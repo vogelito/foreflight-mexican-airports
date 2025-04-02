@@ -1,14 +1,19 @@
 #!/usr/bin/env ruby
 require 'roo'
 require 'builder'
+require 'zip'
+require 'fileutils'
+require 'json'
 
-# Input and output file paths
-excel_file = 'data/base-aerodromo-helipuertos-pub-28022025.xlsx'
-output_kml_file = 'data/custom_mexican_airports.kml'
+# --- Configuration and Paths ---
+excel_file       = 'data/base-aerodromo-helipuertos-pub-28022025.xlsx'
+kml_file         = 'data/custom_mexican_airports.kml'
+kmz_file         = 'data/custom_mexican_airports.kmz'
+build_dir        = 'build_pack'
+navdata_dir      = File.join(build_dir, 'navdata')
+custom_pack_zip  = 'CustomMexicanAirportsCustomPack.zip'
 
-# Translation maps for specific fields
-
-# Aerodrome Type translations
+# --- Translation Maps ---
 aerodrome_type_map = {
   "AERÓDROMO" => "Aerodrome",
   "AERÓDROMO ACUÁTICO" => "Seaplane Base",
@@ -19,7 +24,6 @@ aerodrome_type_map = {
   "ZONA DE DESPEGUE" => "Takeoff Zone"
 }
 
-# Type of Operation translations
 operation_type_map = {
   "" => "",
   "DIRUNO" => "Daytime",      # corrected typo to Daytime
@@ -28,7 +32,6 @@ operation_type_map = {
   "NOCTURNO" => "Night"
 }
 
-# Type of Service translations
 service_type_map = {
   "" => "",
   "SERVICIO PARTICULAR" => "Private Service",
@@ -36,13 +39,11 @@ service_type_map = {
   "SERVICIO PARTICULAR Y A TERCEROS" => "Private and Third-Party Service"
 }
 
-# Active? translations
 active_map = {
   "NO" => "No",
   "SI" => "Yes"
 }
 
-# Status translations
 status_map = {
   "CERRADO POR NOTAM" => "Closed by NOTAM",
   "DESISTIMIENTO DEL  TRAMITE" => "Procedure Withdrawal",
@@ -59,46 +60,46 @@ status_map = {
   "VIGENTE" => "Active"
 }
 
-# Conversion factor from meters to feet
+# Conversion factor: 1 meter = 3.28084 feet
 METER_TO_FEET = 3.28084
 
-# Open the Excel file (assumes .xlsx format)
+# --- Step 1: Generate the KML File ---
+puts "Generating KML file from Excel data..."
 xlsx = Roo::Excelx.new(excel_file)
 sheet = xlsx.sheet(0)
 
-# Create the KML file using Builder
-File.open(output_kml_file, "w") do |file|
+File.open(kml_file, "w") do |file|
   xml = Builder::XmlMarkup.new(target: file, indent: 2)
   xml.instruct! :xml, version: "1.0", encoding: "UTF-8"
   xml.kml(xmlns: "http://www.opengis.net/kml/2.2") do
     xml.Document do
       xml.name("Custom Mexican Airports")
       
-      # Iterate over rows, skipping the first two rows (headers).
-      # Expected columns (by index) and translations:
-      # [0] NO. DE EXPEDIENTE         → File Number
-      # [1] TIPO AERÓDROMO            → Aerodrome Type
-      # [2] DESIGNADOR                → Identifier
-      # [3] NOMBRE                    → Name
-      # [4] ESTADO                    → State
-      # [5] MUNICIPIO                 → Municipality
-      # [6] TIPO DE OPERACIÓN         → Type of Operation
-      # [7] TIPO DE SERVICIO          → Type of Service
-      # [8] NOMBRE (alternate)        → Alternate Name
-      # [9] ELEV (M)                → Elevation (M) [converted to feet]
-      # [10] LATITUD °                → Latitude (Degrees)
-      # [11] LATITUD '                → Latitude (Minutes)
-      # [12] LATITUD ''               → Latitude (Seconds)
-      # [13] LONGITUD °               → Longitude (Degrees)
-      # [14] LONGITUD '               → Longitude (Minutes)
-      # [15] LONGITUD ''              → Longitude (Seconds)
-      # [16] FECHA DE EXPEDICIÓN      → Issue Date
-      # [17] DURACIÓN DEL PERMISO/AUTORIZACIÓN → Permit/Authorization Duration
-      # [18] FECHA DE VENCIMIENTO     → Expiration Date
-      # [19] MES                      → Month
-      # [20] AÑO                      → Year
-      # [21] ¿VIGENTE?               → Active?
-      # [22] SITUACIÓN                → Status
+      # Iterate over rows, skipping the first two header rows.
+      # Expected column indices (0-based) and translations:
+      #  0: NO. DE EXPEDIENTE         → File Number
+      #  1: TIPO AERÓDROMO            → Aerodrome Type
+      #  2: DESIGNADOR                → Identifier
+      #  3: NOMBRE                    → Name
+      #  4: ESTADO                    → State
+      #  5: MUNICIPIO                 → Municipality
+      #  6: TIPO DE OPERACIÓN         → Type of Operation
+      #  7: TIPO DE SERVICIO          → Type of Service
+      #  8: NOMBRE (alternate)        → Alternate Name
+      #  9: ELEV (M)                  → Elevation (M) [to be converted to feet]
+      # 10: LATITUD °                → Latitude (Degrees)
+      # 11: LATITUD '                → Latitude (Minutes)
+      # 12: LATITUD ''               → Latitude (Seconds)
+      # 13: LONGITUD °               → Longitude (Degrees)
+      # 14: LONGITUD '               → Longitude (Minutes)
+      # 15: LONGITUD ''              → Longitude (Seconds)
+      # 16: FECHA DE EXPEDICIÓN      → Issue Date
+      # 17: DURACIÓN DEL PERMISO/AUTORIZACIÓN → Permit/Authorization Duration
+      # 18: FECHA DE VENCIMIENTO     → Expiration Date
+      # 19: MES                      → Month
+      # 20: AÑO                      → Year
+      # 21: ¿VIGENTE?               → Active?
+      # 22: SITUACIÓN                → Status
 
       (1..sheet.last_row).each do |i|
         next if i < 3  # Skip header rows
@@ -129,25 +130,25 @@ File.open(output_kml_file, "w") do |file|
         active            = row[21].to_s.strip
         status            = row[22].to_s.strip
         
-        # Translate fields using our mapping hashes.
+        # Apply translations using mapping hashes.
         translated_aerodrome_type = aerodrome_type_map[aerodrome_type] || aerodrome_type
         translated_operation_type  = operation_type_map[type_of_operation] || type_of_operation
         translated_service_type    = service_type_map[type_of_service] || type_of_service
         translated_active          = active_map[active.upcase] || active
         translated_status          = status_map[status.upcase] || status
 
-        # Convert elevation from meters to feet
+        # Convert elevation from meters to feet.
         elevation_ft = (elevation_m * METER_TO_FEET).round(2)
         
-        # Convert the DMS coordinates to decimal degrees
+        # Convert DMS (Degrees, Minutes, Seconds) to decimal degrees.
         decimal_latitude  = lat_deg + (lat_min / 60.0) + (lat_sec / 3600.0)
         decimal_longitude = lon_deg + (lon_min / 60.0) + (lon_sec / 3600.0)
         
-        # Build a description string using translated field names and values
+        # Build a description string using the translated field names and values.
         description = <<~DESC
           File Number: #{file_number}
           Aerodrome Type: #{translated_aerodrome_type}
-          Identifier: X#{identifier}
+          Identifier: #{identifier}
           Name: #{name}
           State: #{state}
           Municipality: #{municipality}
@@ -166,13 +167,13 @@ File.open(output_kml_file, "w") do |file|
           Status: #{translated_status}
         DESC
 
-        # Create a Placemark for this aerodrome
+        # Create a Placemark for this row.
         xml.Placemark do
           xml.name(name)
-          # Wrap the description in CDATA to preserve formatting and special characters
+          # Use CDATA to preserve formatting and special characters.
           xml.description("<![CDATA[#{description}]]>")
           xml.Point do
-            # KML coordinates are "longitude,latitude,altitude" (altitude set to 0)
+            # KML requires coordinates in "longitude,latitude,altitude" format.
             xml.coordinates("#{decimal_longitude},#{decimal_latitude},0")
           end
         end
@@ -180,5 +181,61 @@ File.open(output_kml_file, "w") do |file|
     end
   end
 end
+puts "KML file created successfully: #{kml_file}"
 
-puts "KML file created successfully: #{output_kml_file}"
+# --- Step 2: Package the KML as a KMZ File ---
+puts "Packaging KML into KMZ file..."
+# A KMZ is a ZIP file containing the KML file named "doc.kml"
+Zip::File.open(kmz_file, Zip::File::CREATE) do |zipfile|
+  zipfile.add("doc.kml", kml_file)
+end
+puts "KMZ file created successfully: #{kmz_file}"
+
+# --- Step 3: Create the Custom Pack Folder Structure and manifest.json ---
+puts "Creating custom pack folder structure..."
+# Remove any existing build directory.
+FileUtils.rm_rf(build_dir) if Dir.exist?(build_dir)
+FileUtils.mkdir_p(navdata_dir)
+
+# Create the manifest.json content.
+manifest_content = {
+  "name" => "Custom Mexican Airports",
+  "version" => 1.0,
+  "expirationDate" => "20260204T210121",
+  "effectiveDate" => "20250203T210121",
+  "noShare" => "true",
+  "organizationName" => "Your Organization Name"
+}
+File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_content))
+
+# Copy the KMZ file into the navdata directory.
+# Naming the KMZ file per the custom pack convention.
+kmz_filename = "Custom Mexican Airports (02-2025).kmz"
+FileUtils.cp(kmz_file, File.join(navdata_dir, kmz_filename))
+puts "Custom pack structure created successfully in '#{build_dir}'"
+
+# --- Step 4: Package the Custom Pack as a ZIP File ---
+puts "Packaging the custom pack into a ZIP file..."
+def zip_directory(input_dir, output_file)
+  entries = Dir.entries(input_dir) - %w[. ..]
+  Zip::File.open(output_file, Zip::File::CREATE) do |zipfile|
+    write_entries(entries, input_dir, '', zipfile)
+  end
+end
+
+def write_entries(entries, path, parent_path, zipfile)
+  entries.each do |entry|
+    full_path = File.join(path, entry)
+    zip_entry = parent_path.empty? ? entry : File.join(parent_path, entry)
+    if File.directory?(full_path)
+      zipfile.mkdir(zip_entry)
+      sub_entries = Dir.entries(full_path) - %w[. ..]
+      write_entries(sub_entries, full_path, zip_entry, zipfile)
+    else
+      zipfile.add(zip_entry, full_path)
+    end
+  end
+end
+
+zip_directory(build_dir, custom_pack_zip)
+puts "Custom pack ZIP file created successfully: #{custom_pack_zip}"

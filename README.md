@@ -19,7 +19,7 @@ This repository contains a Ruby script to convert the [AFAC Mexican Aerodrome Ex
 Install the required gems:
 
 ```bash
-gem install roo builder
+gem install roo builder rubyzip
 ```
 
 ### Usage
