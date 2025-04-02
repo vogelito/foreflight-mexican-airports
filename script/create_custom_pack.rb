@@ -108,7 +108,7 @@ File.open(kml_file, "w") do |file|
         
         file_number       = row[0].to_s.strip
         aerodrome_type    = row[1].to_s.strip
-        identifier        = row[2].to_s.strip
+        identifier        = "X#{row[2].to_s.strip}"
         name              = row[3].to_s.strip
         state             = row[4].to_s.strip
         municipality      = row[5].to_s.strip
@@ -143,6 +143,8 @@ File.open(kml_file, "w") do |file|
         # Convert DMS (Degrees, Minutes, Seconds) to decimal degrees.
         decimal_latitude  = lat_deg + (lat_min / 60.0) + (lat_sec / 3600.0)
         decimal_longitude = -(lon_deg + (lon_min / 60.0) + (lon_sec / 3600.0))
+        # If we don't have the lat/lng info, then just skip
+        next if decimal_latitude == 0 && decimal_longitude == 0
         
         # Build a description string using the translated field names and values.
         description = <<~DESC
@@ -169,7 +171,9 @@ File.open(kml_file, "w") do |file|
 
         # Create a Placemark for this row.
         xml.Placemark do
-          xml.name(name)
+          # Use the identifier if we have it, otherwise use the name
+          id = identifier == "X" ? name : identifier
+          xml.name(id)
           # Use CDATA to preserve formatting and special characters.
           xml.description("<![CDATA[#{description}]]>")
           xml.Point do
@@ -210,7 +214,7 @@ File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_
 
 # Copy the KMZ file into the navdata directory.
 # Naming the KMZ file per the custom pack convention.
-kmz_filename = "Custom Mexican Airports (02-2025).kmz"
+kmz_filename = "Mexican Airports (02-2025).kmz"
 FileUtils.cp(kmz_file, File.join(navdata_dir, kmz_filename))
 puts "Custom pack structure created successfully in '#{build_dir}'"
 
