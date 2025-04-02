@@ -1,6 +1,7 @@
 CustomMexicanAirportsCustomPack.zip
 build_pack/
 data/*
+.DS_Store
 
 # GitHub Ruby .gitignore template
 *.gem
