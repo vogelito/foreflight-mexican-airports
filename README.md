@@ -25,9 +25,9 @@ gem install roo builder
 ### Usage
 1. Place your Excel file (`base-aerodromo-helipuertos-pub-28022025.xlsx`) in the `data/` folder.
 1. Run the Ruby script:
-```bash
-ruby script/create_custom_pack.rb
-```
+   ```bash
+   ruby script/create_custom_pack.rb
+   ```
 1. The generated KML file will be saved (e.g., `custom_mexican_airports.kml`).
 1. Package your custom pack by placing the KML file into the appropriate folder structure and zipping it up for ForeFlight.
 
