@@ -8,59 +8,106 @@ output_kml_file = 'data/custom_mexican_airports.kml'
 
 # Open the Excel file (assumes .xlsx format)
 xlsx = Roo::Excelx.new(excel_file)
-
-# Use the first sheet; adjust if your data is on a different sheet
 sheet = xlsx.sheet(0)
-(1..sheet.last_row).each do |i|
-  next if i < 3
-  row = sheet.row(i)
-  # puts "Row #{i}: #{row.inspect}"
-  # puts row[0]
-  # exit  # Exit after printing the first row for testing
-end
 
-
-# Open the output file for writing the KML content
+# Create the KML file using Builder
 File.open(output_kml_file, "w") do |file|
   xml = Builder::XmlMarkup.new(target: file, indent: 2)
   xml.instruct! :xml, version: "1.0", encoding: "UTF-8"
-  
   xml.kml(xmlns: "http://www.opengis.net/kml/2.2") do
     xml.Document do
       xml.name("Custom Mexican Airports")
+      
+      # Iterate over rows, skipping the first two rows which contain headers.
+      # Expected headers and their translations:
+      # [0] "NO. DE EXPEDIENTE" → File Number
+      # [1] "TIPO AERÓDROMO" → Aerodrome Type
+      # [2] "DESIGNADOR" → Identifier
+      # [3] "NOMBRE" → Name
+      # [4] "ESTADO" → State
+      # [5] "MUNICIPIO" → Municipality
+      # [6] "TIPO DE OPERACIÓN" → Type of Operation
+      # [7] "TIPO DE SERVICIO" → Type of Service
+      # [8] "NOMBRE" → Name (alternate)
+      # [9] "ELEV (M)" → Elevation (M)
+      # [10] "LATITUD\n°" → Latitude (Degrees)
+      # [11] "LATITUD\n'" → Latitude (Minutes)
+      # [12] "LATITUD\n''" → Latitude (Seconds)
+      # [13] "LONGITUD\n°" → Longitude (Degrees)
+      # [14] "LONGITUD\n'" → Longitude (Minutes)
+      # [15] "LONGITUD\n''" → Longitude (Seconds)
+      # [16] "FECHA DE EXPEDICIÓN" → Issue Date
+      # [17] "DURACIÓN DEL PERMISO/AUTORIZACIÓN" → Permit/Authorization Duration
+      # [18] "FECHA DE VENCIMIENTO" → Expiration Date
+      # [19] "MES" → Month
+      # [20] "AÑO" → Year
+      # [21] "¿VIGENTE?" → Active?
+      # [22] "SITUACIÓN" → Status
 
-      # Iterate over rows, skipping the first two rows which contains headers.
-      # Expected headers: "NO. DE EXPEDIENTE"[0], "TIPO AERÓDROMO"[1], "DESIGNADOR"[2],
-      # "NOMBRE"[3], "ESTADO"[4], "MUNICIPIO"[5], "TIPO DE OPERACIÓN"[6], "TIPO DE SERVICIO"[7],
-      # "NOMBRE"[8], "ELEV (M)"[9], "LATITUD\n°"[10], "LATITUD\n'"[11], "LATITUD\n''"[12],
-      # "LONGITUD\n°"[13], "LONGITUD\n'"[14], "LONGITUD\n''"[15], "FECHA DE EXPEDICIÓN"[16], 
-      # "DURACIÓN DEL PERMISO/  AUTORIZACIÓN"[17], "FECHA DE  VENCIMIENTO"[18], "MES"[19],
-      # "AÑO"[20], "¿VIGENTE?"[21], "SITUACIÓN"[22]
       (1..sheet.last_row).each do |i|
-        next if i < 3
+        next if i < 3  # Skip the first two rows
+
         row = sheet.row(i)
-
-        file_number = row[0]
-
-        # Create a description with details about the aerodrome
+        
+        file_number       = row[0]
+        aerodrome_type    = row[1]
+        identifier        = row[2]
+        name              = row[3]
+        state             = row[4]
+        municipality      = row[5]
+        type_of_operation = row[6]
+        type_of_service   = row[7]
+        name_alt          = row[8]
+        elevation         = row[9]
+        lat_deg           = row[10].to_f
+        lat_min           = row[11].to_f
+        lat_sec           = row[12].to_f
+        lon_deg           = row[13].to_f
+        lon_min           = row[14].to_f
+        lon_sec           = row[15].to_f
+        issue_date        = row[16]
+        permit_duration   = row[17]
+        expiration_date   = row[18]
+        month             = row[19]
+        year              = row[20]
+        active            = row[21]
+        status            = row[22]
+        
+        # Convert the DMS coordinates to decimal degrees
+        decimal_latitude  = lat_deg + (lat_min / 60.0) + (lat_sec / 3600.0)
+        decimal_longitude = lon_deg + (lon_min / 60.0) + (lon_sec / 3600.0)
+        
+        # Build a description string using the translated field names
         description = <<~DESC
           File Number: #{file_number}
-          Aerodrome Type: #{row[1]}
-          Identifier: X#{row[2]}
-          Name: #{row[3]}
-          State: #{row[4]}
-          Municipality: #{row[5]}
+          Aerodrome Type: #{aerodrome_type}
+          Identifier: #{identifier}
+          Name: #{name}
+          State: #{state}
+          Municipality: #{municipality}
+          Type of Operation: #{type_of_operation}
+          Type of Service: #{type_of_service}
+          Alternate Name: #{name_alt}
+          Elevation (M): #{elevation}
+          Latitude: #{lat_deg}° #{lat_min}' #{lat_sec}"
+          Longitude: #{lon_deg}° #{lon_min}' #{lon_sec}"
+          Issue Date: #{issue_date}
+          Permit/Authorization Duration: #{permit_duration}
+          Expiration Date: #{expiration_date}
+          Month: #{month}
+          Year: #{year}
+          Active?: #{active}
+          Status: #{status}
         DESC
-        puts description
-        Process.exit
 
+        # Create a Placemark for each row
         xml.Placemark do
-          xml.name(row["Name"])
-          # Wrap the description in CDATA to preserve formatting
+          xml.name(name)
+          # Wrap the description in CDATA to preserve special characters
           xml.description("<![CDATA[#{description}]]>")
           xml.Point do
-            # KML expects coordinates in longitude,latitude,altitude format
-            xml.coordinates("#{row["Longitude"]},#{row["Latitude"]},0")
+            # KML coordinates are in "longitude,latitude,altitude" format; altitude is set to 0
+            xml.coordinates("#{decimal_longitude},#{decimal_latitude},0")
           end
         end
       end
