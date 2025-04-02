@@ -12,6 +12,7 @@ kmz_file         = 'data/custom_mexican_airports.kmz'
 build_dir        = 'build_pack'
 navdata_dir      = File.join(build_dir, 'navdata')
 custom_pack_zip  = 'CustomMexicanAirportsCustomPack.zip'
+image_file       = 'assets/airfield_green.svg.png'
 
 # --- Translation Maps ---
 aerodrome_type_map = {
@@ -74,7 +75,20 @@ File.open(kml_file, "w") do |file|
   xml.kml(xmlns: "http://www.opengis.net/kml/2.2") do
     xml.Document do
       xml.name("Custom Mexican Airports")
-      
+
+      # --- Add Default Style ---
+      # This style references an icon (airfield_green.svg.png) in the 'files' folder.
+      xml.Style(:id => "defaultIcon") do
+        xml.IconStyle do
+          xml.colorMode("normal")
+          xml.scale("1")
+          xml.heading("0")
+          xml.Icon do
+            xml.href("files/airfield_green.svg.png")
+          end
+        end
+      end
+
       # Iterate over rows, skipping the first two header rows.
       # Expected column indices (0-based) and translations:
       #  0: NO. DE EXPEDIENTE         → File Number
@@ -143,7 +157,7 @@ File.open(kml_file, "w") do |file|
         # Convert DMS (Degrees, Minutes, Seconds) to decimal degrees.
         decimal_latitude  = lat_deg + (lat_min / 60.0) + (lat_sec / 3600.0)
         decimal_longitude = -(lon_deg + (lon_min / 60.0) + (lon_sec / 3600.0))
-        # If we don't have the lat/lng info, then just skip
+        # If we don't have the lat/lng info, then just skip.
         next if decimal_latitude == 0 && decimal_longitude == 0
         
         # Build a description string using the translated field names and values.
@@ -171,9 +185,10 @@ File.open(kml_file, "w") do |file|
 
         # Create a Placemark for this row.
         xml.Placemark do
-          # Use the identifier if we have it, otherwise use the name
-          id = identifier == "X" ? name : identifier
-          xml.name(id)
+          # Some rows don't include an identifier, so use the name for those
+          id_value = identifier == "X" ? name : identifier
+          xml.name(id_value)
+          xml.styleUrl("#defaultIcon")
           # Use CDATA to preserve formatting and special characters.
           xml.description("<![CDATA[#{description}]]>")
           xml.Point do
@@ -200,6 +215,17 @@ puts "Creating custom pack folder structure..."
 # Remove any existing build directory.
 FileUtils.rm_rf(build_dir) if Dir.exist?(build_dir)
 FileUtils.mkdir_p(navdata_dir)
+
+# Create a "files" folder for the images
+files_dir = File.join(build_dir, "files")
+FileUtils.mkdir_p(files_dir)
+
+if File.exist?(image_file)
+  FileUtils.cp(image_file, File.join(files_dir, File.basename("airfield_green.svg.png")))
+  puts "Logo file copied to custom pack 'files' folder."
+else
+  puts "Logo file not found. Please add your logo to the 'files' folder in the custom pack."
+end
 
 # Create the manifest.json content.
 manifest_content = {
