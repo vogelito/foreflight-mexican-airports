@@ -142,7 +142,7 @@ File.open(kml_file, "w") do |file|
         
         # Convert DMS (Degrees, Minutes, Seconds) to decimal degrees.
         decimal_latitude  = lat_deg + (lat_min / 60.0) + (lat_sec / 3600.0)
-        decimal_longitude = lon_deg + (lon_min / 60.0) + (lon_sec / 3600.0)
+        decimal_longitude = -(lon_deg + (lon_min / 60.0) + (lon_sec / 3600.0))
         
         # Build a description string using the translated field names and values.
         description = <<~DESC
@@ -156,8 +156,8 @@ File.open(kml_file, "w") do |file|
           Type of Service: #{translated_service_type}
           Alternate Name: #{name_alt}
           Elevation: #{elevation_ft} ft (#{elevation_m} m)
-          Latitude: #{lat_deg}° #{lat_min}' #{lat_sec}" (Decimal: #{decimal_latitude.round(6)})
-          Longitude: #{lon_deg}° #{lon_min}' #{lon_sec}" (Decimal: #{decimal_longitude.round(6)})
+          Latitude: #{lat_deg}° #{lat_min}' #{lat_sec}"
+          Longitude: #{lon_deg}° #{lon_min}' #{lon_sec}"
           Issue Date: #{issue_date}
           Permit/Authorization Duration: #{permit_duration}
           Expiration Date: #{expiration_date}
@@ -199,12 +199,12 @@ FileUtils.mkdir_p(navdata_dir)
 
 # Create the manifest.json content.
 manifest_content = {
-  "name" => "Custom Mexican Airports",
+  "name" => "Mexican Airports",
   "version" => 1.0,
   "expirationDate" => "20260204T210121",
   "effectiveDate" => "20250203T210121",
   "noShare" => "true",
-  "organizationName" => "Your Organization Name"
+  "organizationName" => "VogelitoAir"
 }
 File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_content))
 
