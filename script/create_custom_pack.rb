@@ -207,6 +207,9 @@ puts "Packaging KML into KMZ file..."
 # A KMZ is a ZIP file containing the KML file named "doc.kml"
 Zip::File.open(kmz_file, Zip::File::CREATE) do |zipfile|
   zipfile.add("doc.kml", kml_file)
+  # Add a "files" folder with the PNG image inside the KMZ.
+  zipfile.mkdir("files") unless zipfile.find_entry("files/")
+  zipfile.add("files/airfield_green.svg.png", image_file)
 end
 puts "KMZ file created successfully: #{kmz_file}"
 
@@ -215,17 +218,6 @@ puts "Creating custom pack folder structure..."
 # Remove any existing build directory.
 FileUtils.rm_rf(build_dir) if Dir.exist?(build_dir)
 FileUtils.mkdir_p(navdata_dir)
-
-# Create a "files" folder for the images
-files_dir = File.join(build_dir, "files")
-FileUtils.mkdir_p(files_dir)
-
-if File.exist?(image_file)
-  FileUtils.cp(image_file, File.join(files_dir, File.basename("airfield_green.svg.png")))
-  puts "Logo file copied to custom pack 'files' folder."
-else
-  puts "Logo file not found. Please add your logo to the 'files' folder in the custom pack."
-end
 
 # Create the manifest.json content.
 manifest_content = {
