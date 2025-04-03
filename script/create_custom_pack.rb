@@ -160,8 +160,64 @@ File.open(kml_file, "w") do |file|
         # If we don't have the lat/lng info, then just skip.
         next if decimal_latitude == 0 && decimal_longitude == 0
         
+        # Build a nicely formatted HTML description
+        description = <<~HTML
+          <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <style>
+              /* Basic styling reminiscent of ForeFlight */
+              body {
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                color: #333;
+              }
+              .airport-info {
+                padding: 8px;
+              }
+              .airport-title {
+                background-color: #1e374f;
+                color: #fff;
+                font-size: 20px;
+                padding: 8px;
+                margin-bottom: 8px;
+              }
+              table {
+                width: 100%;
+                border-collapse: collapse;
+              }
+              .label {
+                width: 40%;
+                font-weight: 600;
+                padding: 4px;
+                background-color: #f2f2f2;
+              }
+              .value {
+                width: 60%;
+                padding: 4px;
+              }
+              .spacer {
+                height: 10px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="airport-info">
+              <div class="airport-title">#{name} (#{identifier})</div>
+              <table>
+                <tr>
+                  <td class="label">File Number</td>
+                  <td class="value">#{file_number}</td>
+                </tr>
+                <!-- Add more rows for the fields you want to display -->
+              </table>
+            </div>
+          </body>
+        HTML
+
+
         # Build a description string using the translated field names and values.
-        description = <<~DESC
+        description2 = <<~DESC
           File Number: #{file_number}
           Aerodrome Type: #{translated_aerodrome_type}
           Identifier: #{identifier}
