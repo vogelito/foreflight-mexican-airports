@@ -204,6 +204,8 @@ puts "KML file created successfully: #{kml_file}"
 
 # --- Step 2: Package the KML as a KMZ File ---
 puts "Packaging KML into KMZ file..."
+# Remove existing KMZ file if it exists.
+FileUtils.rm_f(kmz_file)
 # A KMZ is a ZIP file containing the KML file named "doc.kml"
 Zip::File.open(kmz_file, Zip::File::CREATE) do |zipfile|
   zipfile.add("doc.kml", kml_file)
@@ -231,13 +233,14 @@ manifest_content = {
 File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_content))
 
 # Copy the KMZ file into the navdata directory.
-# Naming the KMZ file per the custom pack convention.
 kmz_filename = "Mexican Airports (02-2025).kmz"
 FileUtils.cp(kmz_file, File.join(navdata_dir, kmz_filename))
 puts "Custom pack structure created successfully in '#{build_dir}'"
 
 # --- Step 4: Package the Custom Pack as a ZIP File ---
 puts "Packaging the custom pack into a ZIP file..."
+# Remove existing custom pack ZIP if it exists.
+FileUtils.rm_f(custom_pack_zip)
 def zip_directory(input_dir, output_file)
   entries = Dir.entries(input_dir) - %w[. ..]
   Zip::File.open(output_file, Zip::File::CREATE) do |zipfile|
