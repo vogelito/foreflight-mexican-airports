@@ -1,0 +1,15 @@
+Design a set of flat, minimalistic, vector-style icons at 80×80 pixels for a flight overlay application. Create three variations for each icon representing different operational statuses: one for 'active' (using a vivid green color), one for 'in permit' (using yellow), and one for 'inactive' (using muted gray). The icons should represent six aerodrome types:
+
+Aerodrome (standard airport icon),
+
+Heliport (a helicopter landing pad icon),
+
+Heliport (Boat) (a helicopter icon with a boat element),
+
+Heliport Platform (an icon depicting a helicopter platform),
+
+Seaplane Base (an icon that symbolizes water and a seaplane), and
+
+Takeoff Zone (an icon that represents a hot air balloon).
+
+Ensure that each icon variant is clear, modern, and easily identifiable, with a consistent look that fits within a flight overlay map similar to ForeFlight

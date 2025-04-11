@@ -91,10 +91,9 @@ duration_units_map = {
 def translate_duration(duration, duration_units_map)
   duration = duration.strip
   return duration if duration.empty?
-  if duration =~ /^\d/
-    parts = duration.split(" ", 2)
-    number = parts[0]
-    unit = parts[1] || ""
+  if duration =~ /^(\d+)\s*([[:alpha:]]+)/
+    number = $1
+    unit = $2
     translated_unit = duration_units_map[unit.upcase] || unit
     "#{number} #{translated_unit}"
   else
@@ -406,14 +405,16 @@ File.open(kml_file, "w") do |file|
           Elevation: #{elevation_ft} ft (#{elevation_m} m)
           Latitude: #{lat_deg}° #{lat_min}' #{lat_sec}"
           Longitude: #{lon_deg}° #{lon_min}' #{lon_sec}"
-          Issue Date: #{issue_date}
-          Permit/Authorization Duration: #{permit_duration}
-          Expiration Date: #{expiration_date}
+          Issue Date: #{translated_issue_date}
+          Permit/Authorization Duration: #{translated_permit_duration}
+          Expiration Date: #{translated_expiration_date}
           Month: #{month}
           Year: #{year}
           Active?: #{translated_active}
           Status: #{translated_status}
         DESC
+
+        puts description2
 
         # Create a Placemark for this row.
         xml.Placemark do
