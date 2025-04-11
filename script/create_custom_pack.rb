@@ -173,31 +173,35 @@ File.open(kml_file, "w") do |file|
                 color: #333;
               }
               .airport-info {
-                padding: 8px;
+                padding-top: 1px;
               }
               .airport-title {
                 background-color: #1e374f;
                 color: #fff;
-                font-size: 20px;
+                font-size: 40px;
                 padding: 8px;
-                margin-bottom: 8px;
+                margin-bottom: 1px;
               }
               table {
                 width: 100%;
                 border-collapse: collapse;
+                padding-top: 1px;
+                padding-bottom: 1px;
               }
               .label {
                 width: 40%;
                 font-weight: 600;
                 padding: 4px;
                 background-color: #f2f2f2;
+                font-size: 40px;
               }
               .value {
                 width: 60%;
                 padding: 4px;
+                font-size: 40px;
               }
               .spacer {
-                height: 10px;
+                height: 1px;
               }
             </style>
           </head>
@@ -208,6 +212,132 @@ File.open(kml_file, "w") do |file|
                 <tr>
                   <td class="label">File Number</td>
                   <td class="value">#{file_number}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Aerodrome Type</td>
+                  <td class="value">#{translated_aerodrome_type}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Identifier</td>
+                  <td class="value">#{identifier}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Name</td>
+                  <td class="value">#{name}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">State</td>
+                  <td class="value">#{state}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Municipality</td>
+                  <td class="value">#{municipality}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Type of Operation</td>
+                  <td class="value">#{translated_operation_type}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Type of Service</td>
+                  <td class="value">#{translated_service_type}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Alternate Name</td>
+                  <td class="value">#{name_alt}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Elevation</td>
+                  <td class="value">#{elevation_ft} ft (#{elevation_m} m)</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Latitude</td>
+                  <td class="value">#{lat_deg}° #{lat_min}' #{lat_sec}"</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Longitude</td>
+                  <td class="value">#{lon_deg}° #{lon_min}' #{lon_sec}"</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Issue Date</td>
+                  <td class="value">#{issue_date}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Permit/Authorization Duration</td>
+                  <td class="value">#{permit_duration}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Expiration Date</td>
+                  <td class="value">#{expiration_date}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Month</td>
+                  <td class="value">#{month}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Year</td>
+                  <td class="value">#{year}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Active?</td>
+                  <td class="value">#{translated_active}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Status</td>
+                  <td class="value">#{translated_status}</td>
                 </tr>
                 <!-- Add more rows for the fields you want to display -->
               </table>
