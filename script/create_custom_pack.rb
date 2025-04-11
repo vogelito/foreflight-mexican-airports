@@ -61,6 +61,47 @@ status_map = {
   "VIGENTE" => "Active"
 }
 
+# Additional translation maps for dates and duration.
+issue_date_map = {
+  "PROYECTO" => "Project",
+  "SIN AUTORIZACION" => "Not Authorized",
+  "SIN AUTORIZACIÓN" => "Not Authorized",
+  "SUSPENSIÓN DE ACTIVIDADES" => "Suspension of Activities"
+}
+
+expiration_date_map = {
+  "PROYECTO" => "Project",
+  "SIN AUTORIZACION" => "Not Authorized",
+  "SIN AUTORIZACIÓN" => "Not Authorized",
+  "SUSPENSIÓN DE ACTIVIDADES" => "Suspension of Activities"
+}
+
+duration_units_map = {
+  "DIAS" => "Days",
+  "DÍAS" => "Days",
+  "AÑO" => "Year",
+  "AÑOS" => "Years",
+  "MESES" => "Months",
+  "SIN AUTORIZACIÓN" => "Not Authorized",
+  "UNICA OCACIÓN" => "One Time",
+  "SUSPENSIÓN DE ACTIVIDADES" => "Suspension of Activities",
+  "PROYECTO" => "Project"
+}
+
+def translate_duration(duration, duration_units_map)
+  duration = duration.strip
+  return duration if duration.empty?
+  if duration =~ /^\d/
+    parts = duration.split(" ", 2)
+    number = parts[0]
+    unit = parts[1] || ""
+    translated_unit = duration_units_map[unit.upcase] || unit
+    "#{number} #{translated_unit}"
+  else
+    duration_units_map[duration.upcase] || duration
+  end
+end
+
 # Conversion factor: 1 meter = 3.28084 feet
 METER_TO_FEET = 3.28084
 
@@ -150,6 +191,11 @@ File.open(kml_file, "w") do |file|
         translated_service_type    = service_type_map[type_of_service] || type_of_service
         translated_active          = active_map[active.upcase] || active
         translated_status          = status_map[status.upcase] || status
+
+        # Translate date and duration fields.
+        translated_issue_date = issue_date_map[issue_date.upcase] || issue_date
+        translated_expiration_date = expiration_date_map[expiration_date.upcase] || expiration_date
+        translated_permit_duration = translate_duration(permit_duration, duration_units_map)
 
         # Convert elevation from meters to feet.
         elevation_ft = (elevation_m * METER_TO_FEET).round(2)
@@ -295,21 +341,21 @@ File.open(kml_file, "w") do |file|
                 </tr>
                 <tr>
                   <td class="label">Issue Date</td>
-                  <td class="value">#{issue_date}</td>
+                  <td class="value">#{translated_issue_date}</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="spacer"></td>
                 </tr>
                 <tr>
                   <td class="label">Permit/Authorization Duration</td>
-                  <td class="value">#{permit_duration}</td>
+                  <td class="value">#{translated_permit_duration}</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="spacer"></td>
                 </tr>
                 <tr>
                   <td class="label">Expiration Date</td>
-                  <td class="value">#{expiration_date}</td>
+                  <td class="value">#{translated_expiration_date}</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="spacer"></td>
