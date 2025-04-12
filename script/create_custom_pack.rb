@@ -12,7 +12,6 @@ kmz_file         = 'data/custom_mexican_airports.kmz'
 build_dir        = 'build_pack'
 navdata_dir      = File.join(build_dir, 'navdata')
 custom_pack_zip  = 'CustomMexicanAirportsCustomPack.zip'
-image_file       = 'assets/airfield_green.svg.png'
 
 # --- Translation Maps ---
 aerodrome_type_map = {
@@ -116,15 +115,21 @@ File.open(kml_file, "w") do |file|
     xml.Document do
       xml.name("Custom Mexican Airports")
 
-      # --- Add Default Style ---
-      # This style references an icon (airfield_green.svg.png) in the 'files' folder.
-      xml.Style(:id => "defaultIcon") do
-        xml.IconStyle do
-          xml.colorMode("normal")
-          xml.scale("1")
-          xml.heading("0")
-          xml.Icon do
-            xml.href("files/airfield_green.svg.png")
+      # --- Add Styles for each combination of Aerodrome Type and Status ---
+      # Define styles for each base type and status version.
+      ["aerodrome", "heliport", "seaplane_base", "takeoff_zone"].each do |base|
+        ["active", "in_permit", "inactive"].each do |suffix|
+          style_id = "#{base}_#{suffix}"
+          icon_href = "files/#{base}_#{suffix}.png"
+          xml.Style(:id => style_id) do
+            xml.IconStyle do
+              xml.colorMode("normal")
+              xml.scale("1")
+              xml.heading("0")
+              xml.Icon do
+                xml.href(icon_href)
+              end
+            end
           end
         end
       end
@@ -202,8 +207,32 @@ File.open(kml_file, "w") do |file|
         # Convert DMS (Degrees, Minutes, Seconds) to decimal degrees.
         decimal_latitude  = lat_deg + (lat_min / 60.0) + (lat_sec / 3600.0)
         decimal_longitude = -(lon_deg + (lon_min / 60.0) + (lon_sec / 3600.0))
-        # If we don't have the lat/lng info, then just skip.
         next if decimal_latitude == 0 && decimal_longitude == 0
+
+        # Determine the base icon name from the aerodrome type.
+        case translated_aerodrome_type
+        when "Aerodrome"
+          base = "aerodrome"
+        when "Heliport", "Heliport (Boat)", "Heliport Platform"
+          base = "heliport"
+        when "Seaplane Base"
+          base = "seaplane_base"
+        when "Takeoff Zone"
+          base = "takeoff_zone"
+        else
+          base = "aerodrome"
+        end
+
+        # Determine which icon status to use: active, in_permit, or inactive.
+        if translated_status == "Active"
+          icon_suffix = "active"
+        elsif translated_status == "In Process"
+          icon_suffix = "in_permit"
+        else
+          icon_suffix = "inactive"
+        end
+
+        style_id = "#{base}_#{icon_suffix}"
         
         # Build a nicely formatted HTML description
         description = <<~HTML
@@ -384,12 +413,10 @@ File.open(kml_file, "w") do |file|
                   <td class="label">Status</td>
                   <td class="value">#{translated_status}</td>
                 </tr>
-                <!-- Add more rows for the fields you want to display -->
               </table>
             </div>
           </body>
         HTML
-
 
         # Build a description string using the translated field names and values.
         description2 = <<~DESC
@@ -421,7 +448,7 @@ File.open(kml_file, "w") do |file|
           # Some rows don't include an identifier, so use the name for those
           id_value = identifier == "X" ? name : identifier
           xml.name(id_value)
-          xml.styleUrl("#defaultIcon")
+          xml.styleUrl("##{style_id}")
           # Use CDATA to preserve formatting and special characters.
           xml.description("<![CDATA[#{description}]]>")
           xml.Point do
@@ -442,9 +469,14 @@ FileUtils.rm_f(kmz_file)
 # A KMZ is a ZIP file containing the KML file named "doc.kml"
 Zip::File.open(kmz_file, Zip::File::CREATE) do |zipfile|
   zipfile.add("doc.kml", kml_file)
-  # Add a "files" folder with the PNG image inside the KMZ.
+  # Add a "files" folder with all the icon PNGs inside the KMZ.
   zipfile.mkdir("files") unless zipfile.find_entry("files/")
-  zipfile.add("files/airfield_green.svg.png", image_file)
+  ["aerodrome", "heliport", "seaplane_base", "takeoff_zone"].each do |base|
+    ["active", "in_permit", "inactive"].each do |suffix|
+      icon_path = "assets/#{base}_#{suffix}.png"
+      zipfile.add("files/#{base}_#{suffix}.png", icon_path)
+    end
+  end
 end
 puts "KMZ file created successfully: #{kmz_file}"
 
