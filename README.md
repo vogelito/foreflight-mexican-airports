@@ -31,5 +31,10 @@ gem install roo builder rubyzip
 1. The generated KML file will be saved (e.g., `custom_mexican_airports.kml`).
 1. Package your custom pack by placing the KML file into the appropriate folder structure and zipping it up for ForeFlight.
 
+### SVG to PNG
+```bash
+rsvg-convert -w 80 -h 80 -a -o assets/airfield_green.svg.png assets/airfield_green.svg
+```
+
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute.
