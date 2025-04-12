@@ -1,12 +1,8 @@
-<svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" width="80px" height="80px" fill="#000000" transform="matrix(-1, 0, 0, 1, 0, 0)">
-  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+<!--svg width="80px" height="80px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"-->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" width="80px" height="80px">
   <g id="SVGRepo_iconCarrier">
     <!-- Vivid green circle as background -->
     <circle cx="256" cy="256" r="255" fill="#00FF00"/>
-    <style type="text/css">
-      .st0{fill:#000000;}
-    </style>
     <!-- Group that scales the helicopter 15% smaller (85% size), centered at (256,256) -->
     <g transform="translate(256,256) scale(0.85) translate(-256,-256)">
       <g>
