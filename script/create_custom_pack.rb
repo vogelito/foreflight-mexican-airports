@@ -6,7 +6,7 @@ require 'fileutils'
 require 'json'
 
 # --- Configuration and Paths ---
-excel_file       = 'data/base-aerodromo-helipuertos-pub-28022025.xlsx'
+excel_file       = 'data/aerodromos-helipuertos-pub-300925-01102025.xlsx'
 kml_file         = 'data/custom_mexican_airports.kml'
 kmz_file         = 'data/custom_mexican_airports.kmz'
 build_dir        = 'build_pack'
@@ -17,9 +17,10 @@ custom_pack_zip  = 'CustomMexicanAirportsCustomPack.zip'
 aerodrome_type_map = {
   "AERÓDROMO" => "Aerodrome",
   "AERÓDROMO ACUÁTICO" => "Seaplane Base",
-  "AERÓDROMO HELIPUERTO" => "Heliport",
+  "AERÓDROMO HELIPUERTO" => "Aerodrome Heliport",
   "BARCO-HELIPUERTO" => "Heliport (Boat)",
   "HELIPUERTO" => "Heliport",
+  "HELIPLATAFORMA" => "Heliplatform",
   "PLATAFORMA-HELIPUERTO" => "Heliport Platform",
   "ZONA DE DESPEGUE" => "Takeoff Zone"
 }
@@ -87,6 +88,54 @@ duration_units_map = {
   "PROYECTO" => "Project"
 }
 
+classification_map = {
+  "TERRESTRE" => "Land-based",
+  "ELEVADO" => "Elevated",
+  "SUPERFICIE" => "Surface",
+  "HELIPUERTO MIXTO" => "Mixed Heliport",
+  "ACUATICO" => "Aquatic",
+  "METALICA" => "Metallic"
+}
+
+surface_type_map = {
+  "TERRACERÍA" => "Dirt",
+  "TERRACERIA" => "Dirt",
+  "TERRAERIA" => "Dirt",
+  "ASFALTO" => "Asphalt",
+  "CONCRETO" => "Concrete",
+  "cONCRETO" => "Concrete",
+  "CONCRETO HIDRAULICO" => "Hydraulic Concrete",
+  "CONCRETO HIDRÁULICO" => "Hydraulic Concrete",
+  "CONCRETO HIDRAHULICO Y TERRACERIA" => "Hydraulic Concrete and Dirt",
+  "CONCRETO HIDRÁULICO Y TERRACERIA" => "Hydraulic Concrete and Dirt",
+  "METALICA" => "Metal",
+  "METÁLICA" => "Metal",
+  "ALUMINIO" => "Aluminum",
+  "PASTO" => "Grass",
+  "AGUA" => "Water",
+  "ACUÁTICA" => "Aquatic",
+  "MIXTA" => "Mixed",
+  "TERRENO NATURAL" => "Natural Terrain",
+  "SUELO COMPACTADO" => "Compacted Soil",
+  "PIEDRA COMPACTADA" => "Compacted Stone",
+  "TEPETATE COMPACTADO" => "Compacted Tepetate",
+  "PLACA METALICA" => "Metal Plate",
+  "TERRACERIA COMPACTADA" => "Compacted Dirt",
+  "TERRACERÍA COMPACTADA" => "Compacted Dirt",
+  "PAVIMENTO ASFALTICO" => "Asphalt Pavement",
+  "TERRENO NATURAL CON PASTO" => "Natural Terrain with Grass",
+  "TERRENO NATURAL DE ARCILLA COMPACTADA" => "Natural Compacted Clay Terrain"
+}
+
+aircraft_generic_map = {
+  "NO DISPONIBLE" => "Not Available",
+  "SE DESCONOCE" => "Unknown",
+  "PENDIENTE" => "Pending",
+  "ULTRALIGEROS" => "Ultralight",
+  "MONOMOTORES" => "Single-engine",
+  "BIMOTORES" => "Twin-engine"
+}
+
 def translate_duration(duration, duration_units_map)
   duration = duration.strip
   return duration if duration.empty?
@@ -144,21 +193,31 @@ File.open(kml_file, "w") do |file|
       #  5: MUNICIPIO                 → Municipality
       #  6: TIPO DE OPERACIÓN         → Type of Operation
       #  7: TIPO DE SERVICIO          → Type of Service
-      #  8: NOMBRE (alternate)        → Alternate Name
-      #  9: ELEV (M)                  → Elevation (M) [to be converted to feet]
-      # 10: LATITUD °                → Latitude (Degrees)
-      # 11: LATITUD '                → Latitude (Minutes)
-      # 12: LATITUD ''               → Latitude (Seconds)
-      # 13: LONGITUD °               → Longitude (Degrees)
-      # 14: LONGITUD '               → Longitude (Minutes)
-      # 15: LONGITUD ''              → Longitude (Seconds)
-      # 16: FECHA DE EXPEDICIÓN      → Issue Date
-      # 17: DURACIÓN DEL PERMISO/AUTORIZACIÓN → Permit/Authorization Duration
-      # 18: FECHA DE VENCIMIENTO     → Expiration Date
-      # 19: MES                      → Month
-      # 20: AÑO                      → Year
-      # 21: ¿VIGENTE?               → Active?
-      # 22: SITUACIÓN                → Status
+      #  8: CLASIFICACION             → Classification
+      #  9: CLAVE DE REFERENCIA       → Reference Key
+      # 10: NOMBRE (propietario)      → Owner
+      # 11: ELEV (M)                  → Elevation (M) [to be converted to feet]
+      # 12: SISTEMA                   → Coordinate System
+      # 13: LATITUD °                → Latitude (Degrees)
+      # 14: LATITUD '                → Latitude (Minutes)
+      # 15: LATITUD ''               → Latitude (Seconds)
+      # 16: LONGITUD °               → Longitude (Degrees)
+      # 17: LONGITUD '               → Longitude (Minutes)
+      # 18: LONGITUD ''              → Longitude (Seconds)
+      # 19: ORIENTACION 1A            → Runway Orientation 1
+      # 20: ORIENTACION 2A            → Runway Orientation 2
+      # 21: LONGITUD DE PISTA A       → Runway Length
+      # 22: ANCHO DE PISTA A          → Runway Width
+      # 23: TIPO DE SUPERFICIE A      → Surface Type
+      # 24: AERONAVE CRITICA          → Critical Aircraft
+      # 25: FECHA DE EXPEDICIÓN       → Issue Date
+      # 26: DURACIÓN DEL PERMISO/AUTORIZACIÓN → Permit/Authorization Duration
+      # 27: FECHA DE VENCIMIENTO      → Expiration Date
+      # 28: MES                       → Month
+      # 29: AÑO                       → Year
+      # 30: ¿VIGENTE?                → Active?
+      # 31: SITUACIÓN                 → Status
+      # 32: AEROPUERTO DE CORDINACIÓN → Coordination Airport
 
       (1..sheet.last_row).each do |i|
         next if i < 3  # Skip header rows
@@ -173,21 +232,31 @@ File.open(kml_file, "w") do |file|
         municipality      = row[5].to_s.strip
         type_of_operation = row[6].to_s.strip
         type_of_service   = row[7].to_s.strip
-        name_alt          = row[8].to_s.strip
-        elevation_m       = row[9].to_f
-        lat_deg           = row[10].to_f
-        lat_min           = row[11].to_f
-        lat_sec           = row[12].to_f
-        lon_deg           = row[13].to_f
-        lon_min           = row[14].to_f
-        lon_sec           = row[15].to_f
-        issue_date        = row[16].to_s.strip
-        permit_duration   = row[17].to_s.strip
-        expiration_date   = row[18].to_s.strip
-        month             = row[19].to_s.strip
-        year              = row[20].to_s.strip
-        active            = row[21].to_s.strip
-        status            = row[22].to_s.strip
+        classification    = row[8].to_s.strip
+        reference_key     = row[9].to_s.strip
+        owner             = row[10].to_s.strip
+        elevation_m       = row[11].to_f
+        coord_system      = row[12].to_s.strip
+        lat_deg           = row[13].to_f
+        lat_min           = row[14].to_f
+        lat_sec           = row[15].to_f
+        lon_deg           = row[16].to_f
+        lon_min           = row[17].to_f
+        lon_sec           = row[18].to_f
+        runway_orient_1   = row[19].to_s.strip
+        runway_orient_2   = row[20].to_s.strip
+        runway_length     = row[21].to_s.strip
+        runway_width      = row[22].to_s.strip
+        surface_type      = row[23].to_s.strip
+        critical_aircraft = row[24].to_s.strip
+        issue_date        = row[25].to_s.strip
+        permit_duration   = row[26].to_s.strip
+        expiration_date   = row[27].to_s.strip
+        month             = row[28].to_s.strip
+        year              = row[29].to_s.strip
+        active            = row[30].to_s.strip
+        status            = row[31].to_s.strip
+        coordination_apt  = row[32].to_s.strip
         
         # Apply translations using mapping hashes.
         translated_aerodrome_type = aerodrome_type_map[aerodrome_type] || aerodrome_type
@@ -200,6 +269,11 @@ File.open(kml_file, "w") do |file|
         translated_issue_date = issue_date_map[issue_date.upcase] || issue_date
         translated_expiration_date = expiration_date_map[expiration_date.upcase] || expiration_date
         translated_permit_duration = translate_duration(permit_duration, duration_units_map)
+
+        # Translate new fields.
+        translated_classification = classification_map[classification.upcase] || classification
+        translated_surface_type = surface_type_map[surface_type.upcase] || surface_type
+        translated_aircraft = aircraft_generic_map[critical_aircraft.upcase] || critical_aircraft
 
         # Convert elevation from meters to feet.
         elevation_ft = (elevation_m * METER_TO_FEET).round(2)
@@ -340,8 +414,22 @@ File.open(kml_file, "w") do |file|
                   <td colspan="2" class="spacer"></td>
                 </tr>
                 <tr>
-                  <td class="label">Alternate Name</td>
-                  <td class="value">#{name_alt}</td>
+                  <td class="label">Classification</td>
+                  <td class="value">#{translated_classification}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Reference Key</td>
+                  <td class="value">#{reference_key}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Owner</td>
+                  <td class="value">#{owner}</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="spacer"></td>
@@ -349,6 +437,13 @@ File.open(kml_file, "w") do |file|
                 <tr>
                   <td class="label">Elevation</td>
                   <td class="value">#{elevation_ft} ft (#{elevation_m} m)</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Coordinate System</td>
+                  <td class="value">#{coord_system}</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="spacer"></td>
@@ -363,6 +458,34 @@ File.open(kml_file, "w") do |file|
                 <tr>
                   <td class="label">Longitude</td>
                   <td class="value">#{lon_deg}° #{lon_min}' #{lon_sec}"</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Runway Orientation</td>
+                  <td class="value">#{runway_orient_1}#{runway_orient_2.empty? ? '' : ' / ' + runway_orient_2}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Runway Dimensions</td>
+                  <td class="value">#{runway_length.empty? ? 'N/A' : runway_length + ' m'}#{runway_width.empty? ? '' : ' × ' + runway_width + ' m'}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Runway Surface</td>
+                  <td class="value">#{translated_surface_type}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Critical Aircraft</td>
+                  <td class="value">#{translated_aircraft}</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="spacer"></td>
@@ -413,6 +536,13 @@ File.open(kml_file, "w") do |file|
                   <td class="label">Status</td>
                   <td class="value">#{translated_status}</td>
                 </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Coordination Airport</td>
+                  <td class="value">#{coordination_apt}</td>
+                </tr>
               </table>
             </div>
           </body>
@@ -428,10 +558,17 @@ File.open(kml_file, "w") do |file|
           Municipality: #{municipality}
           Type of Operation: #{translated_operation_type}
           Type of Service: #{translated_service_type}
-          Alternate Name: #{name_alt}
+          Classification: #{translated_classification}
+          Reference Key: #{reference_key}
+          Owner: #{owner}
           Elevation: #{elevation_ft} ft (#{elevation_m} m)
+          Coordinate System: #{coord_system}
           Latitude: #{lat_deg}° #{lat_min}' #{lat_sec}"
           Longitude: #{lon_deg}° #{lon_min}' #{lon_sec}"
+          Runway Orientation: #{runway_orient_1}#{runway_orient_2.empty? ? '' : ' / ' + runway_orient_2}
+          Runway Dimensions: #{runway_length.empty? ? 'N/A' : runway_length + ' m'}#{runway_width.empty? ? '' : ' × ' + runway_width + ' m'}
+          Runway Surface: #{translated_surface_type}
+          Critical Aircraft: #{translated_aircraft}
           Issue Date: #{translated_issue_date}
           Permit/Authorization Duration: #{translated_permit_duration}
           Expiration Date: #{translated_expiration_date}
@@ -439,6 +576,7 @@ File.open(kml_file, "w") do |file|
           Year: #{year}
           Active?: #{translated_active}
           Status: #{translated_status}
+          Coordination Airport: #{coordination_apt}
         DESC
 
         puts description2
