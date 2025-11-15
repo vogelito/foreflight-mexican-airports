@@ -493,7 +493,7 @@ manifest_content = {
   "expirationDate" => "20260204T210121",
   "effectiveDate" => "20250203T210121",
   "noShare" => "true",
-  "organizationName" => "VogelitoAir"
+  "organizationName" => "FEMPPA"
 }
 File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_content))
 
