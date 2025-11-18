@@ -273,6 +273,10 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
         runway_width      = row[22].to_s.strip
         surface_type      = row[23].to_s.strip
         critical_aircraft = row[24].to_s.strip
+
+        # Convert runway dimensions from meters to feet
+        runway_length_ft = runway_length.empty? ? '' : (runway_length.to_f * METER_TO_FEET).round(0)
+        runway_width_ft = runway_width.empty? ? '' : (runway_width.to_f * METER_TO_FEET).round(0)
         issue_date        = row[25].to_s.strip
         permit_duration   = row[26].to_s.strip
         expiration_date   = row[27].to_s.strip
@@ -502,7 +506,7 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
                 </tr>
                 <tr>
                   <td class="label">Runway Dimensions</td>
-                  <td class="value">#{runway_length.empty? ? 'N/A' : runway_length + ' m'}#{runway_width.empty? ? '' : ' × ' + runway_width + ' m'}</td>
+                  <td class="value">#{runway_length.empty? ? 'N/A' : runway_length_ft.to_s + ' ft (' + runway_length.to_s.sub('.0', '') + ' m)'}#{runway_width.empty? ? '' : ' × ' + runway_width_ft.to_s + ' ft (' + runway_width.to_s.sub('.0', '') + ' m)'}</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="spacer"></td>
@@ -597,7 +601,7 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
           Latitude: #{lat_deg}° #{lat_min}' #{lat_sec}"
           Longitude: #{lon_deg}° #{lon_min}' #{lon_sec}"
           Runway Orientation: #{runway_orient_1}#{runway_orient_2.empty? ? '' : ' / ' + runway_orient_2}
-          Runway Dimensions: #{runway_length.empty? ? 'N/A' : runway_length + ' m'}#{runway_width.empty? ? '' : ' × ' + runway_width + ' m'}
+          Runway Dimensions: #{runway_length.empty? ? 'N/A' : runway_length_ft.to_s + ' ft (' + runway_length.to_s.sub('.0', '') + ' m)'}#{runway_width.empty? ? '' : ' × ' + runway_width_ft.to_s + ' ft (' + runway_width.to_s.sub('.0', '') + ' m)'}
           Runway Surface: #{translated_surface_type}
           Critical Aircraft: #{translated_aircraft}
           Issue Date: #{translated_issue_date}
