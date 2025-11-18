@@ -43,5 +43,19 @@ gem install roo builder rubyzip
 rsvg-convert -w 80 -h 80 -a -o assets/airfield_green.svg.png assets/airfield_green.svg
 ```
 
+## ForeFlight Usage Tips
+
+### Preventing Auto-Zoom When Toggling Layers
+
+By default, ForeFlight zooms out to show all Mexican airports when you toggle the FEMPPA layers on. To prevent this behavior and keep your current map view:
+
+1. Open ForeFlight
+2. Go to **More** > **Settings** > **Layer Selector**
+3. Toggle OFF **"Auto-Zoom to Custom Content"**
+
+This allows you to toggle the FEMPPA Apts and FEMPPA Heli layers without changing your current map view or zoom level.
+
+**Note:** This is a ForeFlight setting that affects all custom content layers, not just FEMPPA layers.
+
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute.

@@ -182,3 +182,14 @@ The custom pack follows ForeFlight's specification:
 - HTML descriptions use large fonts (40px) for in-flight tablet readability
 - Styling mimics ForeFlight's blue/white color scheme (#1e374f header)
 - Icons bundled inside KMZ in `files/` directory with relative paths
+
+#### Auto-Zoom Behavior
+
+**Important for users:** ForeFlight automatically zooms to fit all placemarks when a custom layer is toggled on. With 2,000+ Mexican airports, this causes significant zoom-out.
+
+**Solution:** Users can disable this in ForeFlight settings:
+- Path: More > Settings > Layer Selector > "Auto-Zoom to Custom Content"
+- Toggle OFF to prevent zoom when toggling layers
+- This is a ForeFlight setting, not controllable via KML
+
+**Technical Note:** ForeFlight does not support KML elements like `<LookAt>`, `<Camera>`, or `<Region>` that could control view behavior. The auto-zoom is intentional UX design for aviation safety. Users must disable it via the ForeFlight setting if they prefer to maintain their current view.
