@@ -636,7 +636,7 @@ manifest_content = {
 File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_content))
 
 # Copy the KMZ file into the navdata directory.
-kmz_filename = "Mexican Airports (02-2025).kmz"
+kmz_filename = "FEMPPA Apts 09-25.kmz"
 FileUtils.cp(kmz_file, File.join(navdata_dir, kmz_filename))
 puts "Custom pack structure created successfully in '#{build_dir}'"
 
