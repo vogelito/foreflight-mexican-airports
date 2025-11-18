@@ -313,7 +313,13 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
         # Convert DMS (Degrees, Minutes, Seconds) to decimal degrees.
         decimal_latitude  = lat_deg + (lat_min / 60.0) + (lat_sec / 3600.0)
         decimal_longitude = -(lon_deg + (lon_min / 60.0) + (lon_sec / 3600.0))
+
+        # Skip invalid coordinates
         next if decimal_latitude == 0 && decimal_longitude == 0
+
+        # Skip coordinates outside valid Mexico range (filters data errors like XAGA's 11° longitude)
+        next if decimal_latitude < 14 || decimal_latitude > 33
+        next if decimal_longitude > -86 || decimal_longitude < -119
 
         # Determine the base icon name from the aerodrome type.
         case translated_aerodrome_type
