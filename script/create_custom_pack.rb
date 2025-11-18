@@ -7,8 +7,15 @@ require 'json'
 
 # --- Configuration and Paths ---
 excel_file       = 'data/aerodromos-helipuertos-pub-300925-01102025.xlsx'
-kml_file         = 'data/custom_mexican_airports.kml'
-kmz_file         = 'data/custom_mexican_airports.kmz'
+
+# Airports layer files
+kml_file_apts    = 'data/custom_mexican_airports.kml'
+kmz_file_apts    = 'data/custom_mexican_airports.kmz'
+
+# Heliports layer files
+kml_file_heli    = 'data/custom_mexican_heliports.kml'
+kmz_file_heli    = 'data/custom_mexican_heliports.kmz'
+
 build_dir        = 'build_pack'
 navdata_dir      = File.join(build_dir, 'navdata')
 custom_pack_zip  = 'CustomMexicanAirportsCustomPack.zip'
@@ -149,20 +156,37 @@ def translate_duration(duration, duration_units_map)
   end
 end
 
+# Layer filter function - determines which layer(s) an aerodrome belongs to
+def belongs_to_layer?(aerodrome_type, layer)
+  airports_types = ["Aerodrome", "Seaplane Base", "Aerodrome Heliport"]
+  heliports_types = ["Heliport", "Heliport (Boat)", "Heliport Platform",
+                     "Takeoff Zone", "Heliplatform", "Aerodrome Heliport"]
+
+  case layer
+  when :airports
+    airports_types.include?(aerodrome_type)
+  when :heliports
+    heliports_types.include?(aerodrome_type)
+  else
+    false
+  end
+end
+
 # Conversion factor: 1 meter = 3.28084 feet
 METER_TO_FEET = 3.28084
 
-# --- Step 1: Generate the KML File ---
-puts "Generating KML file from Excel data..."
-xlsx = Roo::Excelx.new(excel_file)
-sheet = xlsx.sheet(0)
+# Method to generate KML for a specific layer
+def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_name, maps)
+  puts "Generating #{layer_name} KML..."
+  xlsx = Roo::Excelx.new(excel_file)
+  sheet = xlsx.sheet(0)
 
-File.open(kml_file, "w") do |file|
-  xml = Builder::XmlMarkup.new(target: file, indent: 2)
-  xml.instruct! :xml, version: "1.0", encoding: "UTF-8"
-  xml.kml(xmlns: "http://www.opengis.net/kml/2.2") do
-    xml.Document do
-      xml.name("Custom Mexican Airports")
+  File.open(kml_file, "w") do |file|
+    xml = Builder::XmlMarkup.new(target: file, indent: 2)
+    xml.instruct! :xml, version: "1.0", encoding: "UTF-8"
+    xml.kml(xmlns: "http://www.opengis.net/kml/2.2") do
+      xml.Document do
+        xml.name(layer_name)
 
       # --- Add Styles for each combination of Aerodrome Type and Status ---
       # Define styles for each base type and status version.
@@ -259,21 +283,25 @@ File.open(kml_file, "w") do |file|
         coordination_apt  = row[32].to_s.strip
         
         # Apply translations using mapping hashes.
-        translated_aerodrome_type = aerodrome_type_map[aerodrome_type] || aerodrome_type
-        translated_operation_type  = operation_type_map[type_of_operation] || type_of_operation
-        translated_service_type    = service_type_map[type_of_service] || type_of_service
-        translated_active          = active_map[active.upcase] || active
-        translated_status          = status_map[status.upcase] || status
+        translated_aerodrome_type = maps[:aerodrome_type_map][aerodrome_type] || aerodrome_type
+
+        # Filter: Skip this aerodrome if it doesn't belong to the current layer
+        next unless belongs_to_layer?(translated_aerodrome_type, layer_type)
+
+        translated_operation_type  = maps[:operation_type_map][type_of_operation] || type_of_operation
+        translated_service_type    = maps[:service_type_map][type_of_service] || type_of_service
+        translated_active          = maps[:active_map][active.upcase] || active
+        translated_status          = maps[:status_map][status.upcase] || status
 
         # Translate date and duration fields.
-        translated_issue_date = issue_date_map[issue_date.upcase] || issue_date
-        translated_expiration_date = expiration_date_map[expiration_date.upcase] || expiration_date
-        translated_permit_duration = translate_duration(permit_duration, duration_units_map)
+        translated_issue_date = maps[:issue_date_map][issue_date.upcase] || issue_date
+        translated_expiration_date = maps[:expiration_date_map][expiration_date.upcase] || expiration_date
+        translated_permit_duration = translate_duration(permit_duration, maps[:duration_units_map])
 
         # Translate new fields.
-        translated_classification = classification_map[classification.upcase] || classification
-        translated_surface_type = surface_type_map[surface_type.upcase] || surface_type
-        translated_aircraft = aircraft_generic_map[critical_aircraft.upcase] || critical_aircraft
+        translated_classification = maps[:classification_map][classification.upcase] || classification
+        translated_surface_type = maps[:surface_type_map][surface_type.upcase] || surface_type
+        translated_aircraft = maps[:aircraft_generic_map][critical_aircraft.upcase] || critical_aircraft
 
         # Convert elevation from meters to feet.
         elevation_ft = (elevation_m * METER_TO_FEET).round(2)
@@ -287,12 +315,15 @@ File.open(kml_file, "w") do |file|
         case translated_aerodrome_type
         when "Aerodrome"
           base = "aerodrome"
-        when "Heliport", "Heliport (Boat)", "Heliport Platform"
+        when "Heliport", "Heliport (Boat)", "Heliport Platform", "Heliplatform"
           base = "heliport"
         when "Seaplane Base"
           base = "seaplane_base"
         when "Takeoff Zone"
           base = "takeoff_zone"
+        when "Aerodrome Heliport"
+          # Use heliport icon in heliports layer, aerodrome icon in airports layer
+          base = (layer_type == :heliports) ? "heliport" : "aerodrome"
         else
           base = "aerodrome"
         end
@@ -597,26 +628,51 @@ File.open(kml_file, "w") do |file|
       end
     end
   end
-end
-puts "KML file created successfully: #{kml_file}"
+  end
+  puts "KML file created successfully: #{kml_file}"
 
-# --- Step 2: Package the KML as a KMZ File ---
-puts "Packaging KML into KMZ file..."
-# Remove existing KMZ file if it exists.
-FileUtils.rm_f(kmz_file)
-# A KMZ is a ZIP file containing the KML file named "doc.kml"
-Zip::File.open(kmz_file, create: true) do |zipfile|
-  zipfile.add("doc.kml", kml_file)
-  # Add a "files" folder with all the icon PNGs inside the KMZ.
-  zipfile.mkdir("files") unless zipfile.find_entry("files/")
-  ["aerodrome", "heliport", "seaplane_base", "takeoff_zone"].each do |base|
-    ["active", "in_permit", "inactive"].each do |suffix|
-      icon_path = "assets/#{base}_#{suffix}.png"
-      zipfile.add("files/#{base}_#{suffix}.png", icon_path)
+  # --- Package the KML as a KMZ File ---
+  puts "Packaging KML into KMZ file..."
+  # Remove existing KMZ file if it exists.
+  FileUtils.rm_f(kmz_file)
+  # A KMZ is a ZIP file containing the KML file named "doc.kml"
+  Zip::File.open(kmz_file, create: true) do |zipfile|
+    zipfile.add("doc.kml", kml_file)
+    # Add a "files" folder with all the icon PNGs inside the KMZ.
+    zipfile.mkdir("files") unless zipfile.find_entry("files/")
+    ["aerodrome", "heliport", "seaplane_base", "takeoff_zone"].each do |base|
+      ["active", "in_permit", "inactive"].each do |suffix|
+        icon_path = "assets/#{base}_#{suffix}.png"
+        zipfile.add("files/#{base}_#{suffix}.png", icon_path)
+      end
     end
   end
+  puts "KMZ file created successfully: #{kmz_file}"
 end
-puts "KMZ file created successfully: #{kmz_file}"
+
+# --- Main Execution: Generate both layers ---
+# Prepare translation maps hash
+translation_maps = {
+  aerodrome_type_map: aerodrome_type_map,
+  operation_type_map: operation_type_map,
+  service_type_map: service_type_map,
+  active_map: active_map,
+  status_map: status_map,
+  issue_date_map: issue_date_map,
+  expiration_date_map: expiration_date_map,
+  duration_units_map: duration_units_map,
+  classification_map: classification_map,
+  surface_type_map: surface_type_map,
+  aircraft_generic_map: aircraft_generic_map
+}
+
+# Generate Airports Layer
+puts "=== Generating Airports Layer ==="
+generate_kml_for_layer(excel_file, kml_file_apts, kmz_file_apts, :airports, "FEMPPA Mexican Airports", translation_maps)
+
+# Generate Heliports Layer
+puts "=== Generating Heliports Layer ==="
+generate_kml_for_layer(excel_file, kml_file_heli, kmz_file_heli, :heliports, "FEMPPA Mexican Heliports", translation_maps)
 
 # --- Step 3: Create the Custom Pack Folder Structure and manifest.json ---
 puts "Creating custom pack folder structure..."
@@ -635,9 +691,9 @@ manifest_content = {
 }
 File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_content))
 
-# Copy the KMZ file into the navdata directory.
-kmz_filename = "FEMPPA Apts 09-25.kmz"
-FileUtils.cp(kmz_file, File.join(navdata_dir, kmz_filename))
+# Copy both KMZ files into the navdata directory.
+FileUtils.cp(kmz_file_apts, File.join(navdata_dir, "FEMPPA Apts 09-25.kmz"))
+FileUtils.cp(kmz_file_heli, File.join(navdata_dir, "FEMPPA Heli 09-25.kmz"))
 puts "Custom pack structure created successfully in '#{build_dir}'"
 
 # --- Step 4: Package the Custom Pack as a ZIP File ---
