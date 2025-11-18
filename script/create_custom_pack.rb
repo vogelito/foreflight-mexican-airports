@@ -605,7 +605,7 @@ puts "Packaging KML into KMZ file..."
 # Remove existing KMZ file if it exists.
 FileUtils.rm_f(kmz_file)
 # A KMZ is a ZIP file containing the KML file named "doc.kml"
-Zip::File.open(kmz_file, Zip::File::CREATE) do |zipfile|
+Zip::File.open(kmz_file, create: true) do |zipfile|
   zipfile.add("doc.kml", kml_file)
   # Add a "files" folder with all the icon PNGs inside the KMZ.
   zipfile.mkdir("files") unless zipfile.find_entry("files/")
@@ -646,7 +646,7 @@ puts "Packaging the custom pack into a ZIP file..."
 FileUtils.rm_f(custom_pack_zip)
 def zip_directory(input_dir, output_file)
   entries = Dir.entries(input_dir) - %w[. ..]
-  Zip::File.open(output_file, Zip::File::CREATE) do |zipfile|
+  Zip::File.open(output_file, create: true) do |zipfile|
     write_entries(entries, input_dir, '', zipfile)
   end
 end
