@@ -631,8 +631,8 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
           # Use CDATA to preserve formatting and special characters.
           xml.description("<![CDATA[#{description}]]>")
           xml.Point do
-            # KML requires coordinates in "longitude,latitude,altitude" format.
-            xml.coordinates("#{decimal_longitude},#{decimal_latitude},0")
+            # KML requires coordinates in "longitude,latitude,altitude" format (altitude in meters).
+            xml.coordinates("#{decimal_longitude},#{decimal_latitude},#{elevation_m}")
           end
         end
       end
