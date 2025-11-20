@@ -690,12 +690,14 @@ puts "Creating custom pack folder structure..."
 FileUtils.rm_rf(build_dir) if Dir.exist?(build_dir)
 FileUtils.mkdir_p(navdata_dir)
 
-# Create the manifest.json content.
+# Create the manifest.json content with dynamic dates.
+today = Date.today
+expiration = today >> 4  # 4 months from today
 manifest_content = {
   "name" => "Mexican Airports",
-  "version" => 1.0,
-  "expirationDate" => "20260204T210121",
-  "effectiveDate" => "20250203T210121",
+  "version" => 2.0,
+  "expirationDate" => expiration.strftime("%Y%m%dT000000"),
+  "effectiveDate" => today.strftime("%Y%m%dT000000"),
   "noShare" => "true",
   "organizationName" => "FEMPPA"
 }

@@ -57,5 +57,11 @@ This allows you to toggle the FEMPPA Apts and FEMPPA Heli layers without changin
 
 **Note:** This is a ForeFlight setting that affects all custom content layers, not just FEMPPA layers.
 
+## Version History
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+
+**Current Version:** 2.0 (November 2025)
+
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute.
