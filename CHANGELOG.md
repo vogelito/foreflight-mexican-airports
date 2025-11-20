@@ -62,6 +62,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated from "VogelitoAir" to "FEMPPA"
 - Reflects FEMPPA's role as Mexico's aviation pilot and aircraft owner federation
 
+**Distribution Package**
+- Custom pack filename changed from `CustomMexicanAirportsCustomPack.zip` to `FEMPPA-Mexican-Airports-v2.0.zip`
+- New naming convention: clearer branding, includes version number, removes redundant "Custom" terminology
+- Future releases will follow pattern: `FEMPPA-Mexican-Airports-v[version].zip`
+
 ### Fixed
 
 **Coordinate Accuracy**
@@ -129,7 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Installation
 
-1. Download `CustomMexicanAirportsCustomPack.zip`
+1. Download `FEMPPA-Mexican-Airports-v2.0.zip`
 2. Transfer to your device with ForeFlight
 3. Open ForeFlight > More > Content > Import
 4. Select the ZIP file to import

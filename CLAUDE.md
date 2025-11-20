@@ -17,7 +17,7 @@ This is the main command that:
 2. Generates a KML file at `data/custom_mexican_airports.kml`
 3. Creates a KMZ file at `data/custom_mexican_airports.kmz`
 4. Builds the custom pack folder structure in `build_pack/`
-5. Packages everything into `CustomMexicanAirportsCustomPack.zip`
+5. Packages everything into `FEMPPA-Mexican-Airports-v2.0.zip`
 
 ### Generate PNG Icons from SVG
 ```bash

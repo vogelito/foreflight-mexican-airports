@@ -36,7 +36,7 @@ gem install roo builder rubyzip
 1. The script will generate:
    - `data/custom_mexican_airports.kml` - KML file with airport data
    - `data/custom_mexican_airports.kmz` - Compressed KMZ with icons
-   - `CustomMexicanAirportsCustomPack.zip` - Final ForeFlight custom pack
+   - `FEMPPA-Mexican-Airports-v2.0.zip` - Final ForeFlight custom pack
 
 ### SVG to PNG
 ```bash

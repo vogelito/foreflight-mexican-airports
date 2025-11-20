@@ -18,7 +18,7 @@ kmz_file_heli    = 'data/custom_mexican_heliports.kmz'
 
 build_dir        = 'build_pack'
 navdata_dir      = File.join(build_dir, 'navdata')
-custom_pack_zip  = 'CustomMexicanAirportsCustomPack.zip'
+custom_pack_zip  = 'FEMPPA-Mexican-Airports-v2.0.zip'
 
 # --- Translation Maps ---
 aerodrome_type_map = {
