@@ -13,11 +13,11 @@ This repository generates ForeFlight custom packs for Mexican airports and helip
 ruby script/create_custom_pack.rb
 ```
 This is the main command that:
-1. Reads the Excel file from `data/base-aerodromo-helipuertos-pub-28022025.xlsx`
-2. Generates a KML file at `data/custom_mexican_airports.kml`
-3. Creates a KMZ file at `data/custom_mexican_airports.kmz`
+1. Reads the Excel file from `data/aerodromos-helipuertos-pub-301125-02122025.xlsx`
+2. Generates KML files at `data/custom_mexican_airports.kml` and `data/custom_mexican_heliports.kml`
+3. Creates KMZ files at `data/custom_mexican_airports.kmz` and `data/custom_mexican_heliports.kmz`
 4. Builds the custom pack folder structure in `build_pack/`
-5. Packages everything into `FEMPPA-Mexican-Airports-v2.0.zip`
+5. Packages everything into `FEMPPA-Mexican-Airports-v2.1.zip`
 
 ### Generate PNG Icons from SVG
 ```bash
@@ -36,10 +36,10 @@ gem install roo builder rubyzip
 ## Architecture
 
 ### Data Flow
-1. **Input**: Excel file (`data/base-aerodromo-helipuertos-pub-28022025.xlsx`) containing Mexican aerodrome data from AFAC
+1. **Input**: Excel file (`data/aerodromos-helipuertos-pub-301125-02122025.xlsx`) containing Mexican aerodrome data from AFAC
 2. **Processing**: Ruby script parses Excel, translates Spanish to English, converts coordinates/units
-3. **KML Generation**: Creates styled placemarks with HTML descriptions
-4. **KMZ Packaging**: Bundles KML + icon PNGs into compressed archive
+3. **KML Generation**: Creates styled placemarks with HTML descriptions for both Airports and Heliports layers
+4. **KMZ Packaging**: Bundles KML + icon PNGs into compressed archives (one for each layer)
 5. **Custom Pack Creation**: Structures files per ForeFlight specification with manifest.json
 6. **Final Output**: ZIP file ready for ForeFlight import
 
@@ -87,17 +87,16 @@ The script contains comprehensive translation dictionaries (lines 17-136 in crea
 - Both units displayed in descriptions
 - Runway dimensions kept in meters (as provided by AFAC)
 
-### Runway Information (New in 2025 data)
-The latest AFAC file includes detailed runway data:
+### Runway Information
+The AFAC database includes detailed runway data:
 - **Orientation**: Two values (columns 19-20) for reciprocal runway headings (e.g., "09/27")
 - **Length**: Runway length in meters (column 21)
 - **Width**: Runway width in meters (column 22)
 - **Surface Type**: Runway surface material (column 23) - translated to English
   - Common types: Asphalt, Dirt (Terracería), Concrete, Grass, Metal
   - Handles mixed surfaces (e.g., "Asphalt and Dirt")
-- **Critical Aircraft**: Design aircraft type (column 24)
-  - Generic terms translated (e.g., ULTRALIGEROS → Ultralight)
-  - Specific aircraft models kept as-is (e.g., CESSNA 206, BELL 407)
+
+**Note**: The "Critical Aircraft" field was removed from the AFAC database in the November 2025 format.
 
 ### Classification and Ownership
 - **Classification** (column 8): Aerodrome classification
@@ -120,20 +119,21 @@ Each placemark includes:
 build_pack/
 ├── manifest.json              # ForeFlight metadata (dates, version, org name)
 └── navdata/
-    └── Mexican Airports (02-2025).kmz
+    ├── FEMPPA Apts 11-25.kmz  # Airports layer
+    └── FEMPPA Heli 11-25.kmz  # Heliports layer
 ```
 
 ### Manifest Configuration
-Located at script/create_custom_pack.rb (around line 540-547):
+Located at script/create_custom_pack.rb (around line 698):
 - Name: "Mexican Airports"
 - Organization: "FEMPPA" (Federación Mexicana de Pilotos y Propietarios de Aeronaves)
 - Dates: effectiveDate and expirationDate in format YYYYMMDDTHHMMSS
-- Version: Numeric (1.0)
+- Version: Numeric (2.1)
 - noShare: Controls sharing permissions
 
 ## Important Notes
 
-### Excel Column Mapping
+### Excel Column Mapping (November 2025 Format)
 The script expects specific column indices (0-based, starting at row 3):
 - 0: File Number (NO. DE EXPEDIENTE)
 - 1: Aerodrome Type (TIPO AERÓDROMO)
@@ -145,7 +145,7 @@ The script expects specific column indices (0-based, starting at row 3):
 - 7: Type of Service (TIPO DE SERVICIO)
 - 8: Classification (CLASIFICACION)
 - 9: Reference Key (CLAVE DE REFERENCIA)
-- 10: Owner (NOMBRE - propietario)
+- 10: Owner (NOMBRE)
 - 11: Elevation in meters (ELEV M)
 - 12: Coordinate System (SISTEMA)
 - 13-15: Latitude DMS
@@ -155,13 +155,19 @@ The script expects specific column indices (0-based, starting at row 3):
 - 21: Runway Length (LONGITUD DE PISTA A)
 - 22: Runway Width (ANCHO DE PISTA A)
 - 23: Surface Type (TIPO DE SUPERFICIE A)
-- 24: Critical Aircraft (AERONAVE CRITICA)
-- 25-29: Date and permit information
-- 30: Active? (¿VIGENTE?)
-- 31: Status (SITUACIÓN) - **Critical for icon selection**
-- 32: Coordination Airport (AEROPUERTO DE CORDINACIÓN)
+- 24: Issue Date (FECHA DE EXPEDICIÓN)
+- 25: Permit/Authorization Duration (DURACIÓN DEL PERMISO/AUTORIZACIÓN)
+- 26: Expiration Date (FECHA DE VENCIMIENTO)
+- 27: Active? (¿VIGENTE?)
+- 28: Status (SITUACIÓN) - **Critical for icon selection**
+- 29: Coordination Airport (AEROPUERTO DE CORDINACIÓN)
 
-The status column (31) determines the icon suffix:
+**Important Changes from Previous Format:**
+- Removed columns: AERONAVE CRITICA (Critical Aircraft), MES (Month), AÑO (Year)
+- Date columns shifted left (24-26 instead of 25-27)
+- Status moved from column 31 to column 28
+
+The status column (28) determines the icon suffix:
 - "VIGENTE" → active (green icons)
 - "EN TRAMITE" → in_permit (yellow icons)
 - All others → inactive (red icons)
@@ -172,9 +178,10 @@ The status column (31) determines the icon suffix:
 - This is important for ForeFlight's airport lookup functionality
 
 ### Data Validation
-- Rows with coordinates (0, 0) are skipped (around line 284)
-- First two rows of Excel are always skipped as headers (around line 223)
-- Script processes approximately 2,162 aerodrome entries from the latest file
+- Rows with coordinates (0, 0) are skipped
+- First two rows of Excel are always skipped as headers
+- Geographic boundaries enforced: Latitude 14°-33°N, Longitude 86°-119°W
+- Script processes 2,170 aerodrome entries from the November 2025 database
 
 ### ForeFlight Integration
 The custom pack follows ForeFlight's specification:
@@ -193,3 +200,13 @@ The custom pack follows ForeFlight's specification:
 - This is a ForeFlight setting, not controllable via KML
 
 **Technical Note:** ForeFlight does not support KML elements like `<LookAt>`, `<Camera>`, or `<Region>` that could control view behavior. The auto-zoom is intentional UX design for aviation safety. Users must disable it via the ForeFlight setting if they prefer to maintain their current view.
+
+## Historical Database Archive
+
+Starting with version 2.1, all AFAC source Excel files are preserved in the `afac-sources/` directory for version tracking and historical reference:
+
+- `base-aerodromo-helipuertos-pub-28022025.xlsx` (February 2025 format - 23 columns)
+- `aerodromos-helipuertos-pub-300925-01102025.xlsx` (September 2025 format - 33 columns)
+- `aerodromos-helipuertos-pub-301125-02122025.xlsx` (November 2025 format - 30 columns)
+
+**Note**: The `data/` directory is used for intermediary build files (KML, KMZ) and should not be used for source file storage. The script currently references the working file from `data/` but all archival copies are in `afac-sources/`.

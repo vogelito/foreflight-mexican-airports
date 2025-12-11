@@ -527,13 +527,6 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
                   <td colspan="2" class="spacer"></td>
                 </tr>
                 <tr>
-                  <td class="label">Critical Aircraft</td>
-                  <td class="value">#{translated_aircraft}</td>
-                </tr>
-                <tr>
-                  <td colspan="2" class="spacer"></td>
-                </tr>
-                <tr>
                   <td class="label">Issue Date</td>
                   <td class="value">#{translated_issue_date}</td>
                 </tr>
@@ -550,20 +543,6 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
                 <tr>
                   <td class="label">Expiration Date</td>
                   <td class="value">#{translated_expiration_date}</td>
-                </tr>
-                <tr>
-                  <td colspan="2" class="spacer"></td>
-                </tr>
-                <tr>
-                  <td class="label">Month</td>
-                  <td class="value">#{month}</td>
-                </tr>
-                <tr>
-                  <td colspan="2" class="spacer"></td>
-                </tr>
-                <tr>
-                  <td class="label">Year</td>
-                  <td class="value">#{year}</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="spacer"></td>
@@ -611,12 +590,9 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
           Runway Orientation: #{runway_orient_1}#{runway_orient_2.empty? ? '' : ' / ' + runway_orient_2}
           Runway Dimensions: #{runway_length.empty? ? 'N/A' : runway_length_ft.to_s + ' ft (' + runway_length.to_s.sub('.0', '') + ' m)'}#{runway_width.empty? ? '' : ' × ' + runway_width_ft.to_s + ' ft (' + runway_width.to_s.sub('.0', '') + ' m)'}
           Runway Surface: #{translated_surface_type}
-          Critical Aircraft: #{translated_aircraft}
           Issue Date: #{translated_issue_date}
           Permit/Authorization Duration: #{translated_permit_duration}
           Expiration Date: #{translated_expiration_date}
-          Month: #{month}
-          Year: #{year}
           Active?: #{translated_active}
           Status: #{translated_status}
           Coordination Airport: #{coordination_apt}
