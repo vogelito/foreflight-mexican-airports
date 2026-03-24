@@ -119,8 +119,8 @@ Each placemark includes:
 build_pack/
 ├── manifest.json              # ForeFlight metadata (dates, version, org name)
 └── navdata/
-    ├── FEMPPA Apts 03-26.kmz  # Airports layer
-    └── FEMPPA Heli 03-26.kmz  # Heliports layer
+    ├── FEMPPA Apts.kmz        # Airports layer (static name for clean ForeFlight upgrades)
+    └── FEMPPA Heli.kmz        # Heliports layer (static name for clean ForeFlight upgrades)
 ```
 
 ### Manifest Configuration

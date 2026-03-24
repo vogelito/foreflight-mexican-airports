@@ -712,8 +712,8 @@ manifest_content = {
 File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_content))
 
 # Copy both KMZ files into the navdata directory.
-FileUtils.cp(kmz_file_apts, File.join(navdata_dir, "FEMPPA Apts 03-26.kmz"))
-FileUtils.cp(kmz_file_heli, File.join(navdata_dir, "FEMPPA Heli 03-26.kmz"))
+FileUtils.cp(kmz_file_apts, File.join(navdata_dir, "FEMPPA Apts.kmz"))
+FileUtils.cp(kmz_file_heli, File.join(navdata_dir, "FEMPPA Heli.kmz"))
 puts "Custom pack structure created successfully in '#{build_dir}'"
 
 # --- Step 4: Package the Custom Pack as a ZIP File ---

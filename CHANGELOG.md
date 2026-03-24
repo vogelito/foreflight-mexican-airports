@@ -14,10 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Published: March 2, 2026 (was November 30, 2025)
 - Total entries: 2,174 (was 2,170) - net +4 facilities
 
-**KMZ Filenames**
-- Updated from "11-25" to "03-26" to reflect March 2026 data
-- `FEMPPA Apts 03-26.kmz` (was `FEMPPA Apts 11-25.kmz`)
-- `FEMPPA Heli 03-26.kmz` (was `FEMPPA Heli 11-25.kmz`)
+**KMZ Filenames (static from v2.2 onwards)**
+- KMZ filenames are now static (no date suffix) to enable clean in-place upgrades in ForeFlight
+- Previously, changing date suffixes caused ForeFlight to create new layers instead of replacing existing ones
+- `FEMPPA Apts.kmz` (was `FEMPPA Apts 11-25.kmz`)
+- `FEMPPA Heli.kmz` (was `FEMPPA Heli 11-25.kmz`)
+- **Note for v2.1 users:** On first import of v2.2, you may need to manually remove the old `FEMPPA Apts 11-25` and `FEMPPA Heli 11-25` layers from ForeFlight, as they had different filenames. Future upgrades beyond v2.2 will replace cleanly.
 
 **Distribution Package**
 - Updated from `FEMPPA-Mexican-Airports-v2.1.zip` to `FEMPPA-Mexican-Airports-v2.2.zip`
