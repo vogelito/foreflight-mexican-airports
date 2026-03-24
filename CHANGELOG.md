@@ -61,11 +61,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Installation
 
-1. Download `FEMPPA-Mexican-Airports-v2.2.zip`
-2. Transfer to your device with ForeFlight
-3. Open ForeFlight > More > Content > Import
-4. Select the ZIP file to import
-5. Toggle layers: Map > Layers > FEMPPA Mexican Airports / FEMPPA Mexican Heliports
+**Upgrading from a previous version:**
+1. In ForeFlight, go to More > Content
+2. Find the old FEMPPA pack, swipe left and delete it
+3. Download `FEMPPA-Mexican-Airports-v2.2.zip`
+4. Transfer to your device and open ForeFlight > More > Content > Import
+5. Select the ZIP file to import
+6. Toggle layers: Map > Layers > FEMPPA Mexican Airports / FEMPPA Mexican Heliports
+
+> **Note:** ForeFlight does not support in-place pack updates — importing a new version always creates a separate entry. Always delete the old pack first to avoid duplicates.
 
 **Optional:** Disable auto-zoom in More > Settings > Layer Selector > Auto-Zoom to Custom Content
 
@@ -147,11 +151,12 @@ All AFAC source databases are preserved in the `afac-sources/` directory:
 
 ### Installation
 
+**Upgrading from a previous version:** Delete the old pack in ForeFlight (More > Content > swipe left to delete) before importing.
+
 1. Download `FEMPPA-Mexican-Airports-v2.1.zip`
-2. Transfer to your device with ForeFlight
-3. Open ForeFlight > More > Content > Import
-4. Select the ZIP file to import
-5. Toggle layers: Map > Layers > FEMPPA Mexican Airports / FEMPPA Mexican Heliports
+2. Transfer to your device and open ForeFlight > More > Content > Import
+3. Select the ZIP file to import
+4. Toggle layers: Map > Layers > FEMPPA Mexican Airports / FEMPPA Mexican Heliports
 
 **Optional:** Disable auto-zoom in More > Settings > Layer Selector > Auto-Zoom to Custom Content
 
