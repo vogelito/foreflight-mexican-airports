@@ -13,11 +13,11 @@ This repository generates ForeFlight custom packs for Mexican airports and helip
 ruby script/create_custom_pack.rb
 ```
 This is the main command that:
-1. Reads the Excel file from `data/aerodromos-helipuertos-pub-020326.xlsx`
+1. Reads the Excel file from `data/aerodromos-y-helipuertos-pub-210426.xlsx`
 2. Generates KML files at `data/custom_mexican_airports.kml` and `data/custom_mexican_heliports.kml`
 3. Creates KMZ files at `data/custom_mexican_airports.kmz` and `data/custom_mexican_heliports.kmz`
 4. Builds the custom pack folder structure in `build_pack/`
-5. Packages everything into `FEMPPA-Mexican-Airports-v2.2.zip`
+5. Packages everything into `FEMPPA-Mexican-Airports-v2.3.zip`
 
 ### Generate PNG Icons from SVG
 ```bash
@@ -119,8 +119,8 @@ Each placemark includes:
 build_pack/
 ├── manifest.json              # ForeFlight metadata (dates, version, org name)
 └── navdata/
-    ├── FEMPPA Apts 03-26.kmz  # Airports layer
-    └── FEMPPA Heli 03-26.kmz  # Heliports layer
+    ├── FEMPPA Apts 04-26.kmz  # Airports layer
+    └── FEMPPA Heli 04-26.kmz  # Heliports layer
 ```
 
 ### Manifest Configuration
@@ -133,7 +133,7 @@ Located at script/create_custom_pack.rb (around line 698):
 
 ## Important Notes
 
-### Excel Column Mapping (March 2026 Format)
+### Excel Column Mapping (April 2026 Format)
 The script expects specific column indices (0-based, starting at row 3):
 - 0: File Number (NO. DE EXPEDIENTE)
 - 1: Aerodrome Type (TIPO AERÓDROMO)
@@ -155,20 +155,19 @@ The script expects specific column indices (0-based, starting at row 3):
 - 21: Runway Length (LONGITUD DE PISTA A)
 - 22: Runway Width (ANCHO DE PISTA A)
 - 23: Surface Type (TIPO DE SUPERFICIE A)
-- 24: Critical Aircraft (AERONAVE CRITICA)
-- 25: Issue Date (FECHA DE EXPEDICIÓN)
-- 26: Permit/Authorization Duration (DURACIÓN DEL PERMISO/AUTORIZACIÓN)
-- 27: Expiration Date (FECHA DE VENCIMIENTO)
-- 28: Month (MES)
-- 29: Year (AÑO)
-- 30: Active? (¿VIGENTE?)
-- 31: Status (SITUACIÓN) - **Critical for icon selection**
-- 32: Coordination Airport (AEROPUERTO DE CORDINACIÓN)
+- 24: Issue Date (FECHA DE EXPEDICIÓN)
+- 25: Permit/Authorization Duration (DURACIÓN DEL PERMISO/AUTORIZACIÓN)
+- 26: Expiration Date (FECHA DE VENCIMIENTO)
+- 27: Month (MES)
+- 28: Year (AÑO)
+- 29: Active? (¿VIGENTE?)
+- 30: Status (SITUACIÓN) - **Critical for icon selection**
+- 31: Coordination Airport (AEROPUERTO DE CORDINACIÓN)
 
-**Important Changes from Previous Format (November 2025 → March 2026):**
-- Restored columns: AERONAVE CRITICA (col 24), MES (col 28), AÑO (col 29)
-- Date/status columns shifted right: Status moved from column 28 back to column 31
-- Format reverts to the 33-column structure used in September 2025 (v2.0)
+**Important Changes from Previous Format (March 2026 → April 2026):**
+- Removed column: AERONAVE CRITICA (was col 24 in March 2026, absent again in April 2026)
+- Date/status columns shifted left by 1: Status moved from column 31 back to column 30
+- 32-column format (MES and AÑO present, but Critical Aircraft absent)
 
 The status column (28) determines the icon suffix:
 - "VIGENTE" → active (green icons)
@@ -184,7 +183,7 @@ The status column (28) determines the icon suffix:
 - Rows with coordinates (0, 0) are skipped
 - First two rows of Excel are always skipped as headers
 - Geographic boundaries enforced: Latitude 14°-33°N, Longitude 86°-119°W
-- Script processes 2,174 aerodrome entries from the March 2026 database
+- Script processes 2,177 aerodrome entries from the April 2026 database
 
 ### ForeFlight Integration
 The custom pack follows ForeFlight's specification:
@@ -212,5 +211,6 @@ Starting with version 2.1, all AFAC source Excel files are preserved in the `afa
 - `aerodromos-helipuertos-pub-300925-01102025.xlsx` (September 2025 format - 33 columns)
 - `aerodromos-helipuertos-pub-301125-02122025.xlsx` (November 2025 format - 30 columns)
 - `aerodromos-helipuertos-pub-020326.xlsx` (March 2026 format - 33 columns, restored AERONAVE CRITICA/MES/AÑO)
+- `aerodromos-y-helipuertos-pub-210426.xlsx` (April 2026 format - 32 columns, AERONAVE CRITICA removed again)
 
-**Note**: The `data/` directory is used for intermediary build files (KML, KMZ) and should not be used for source file storage. The script currently references the working file from `data/aerodromos-helipuertos-pub-020326.xlsx` but all archival copies are in `afac-sources/`.
+**Note**: The `data/` directory is used for intermediary build files (KML, KMZ) and should not be used for source file storage. The script currently references the working file from `data/aerodromos-y-helipuertos-pub-210426.xlsx` but all archival copies are in `afac-sources/`.

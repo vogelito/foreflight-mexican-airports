@@ -6,7 +6,7 @@ require 'fileutils'
 require 'json'
 
 # --- Configuration and Paths ---
-excel_file       = 'data/aerodromos-helipuertos-pub-020326.xlsx'
+excel_file       = 'data/aerodromos-y-helipuertos-pub-210426.xlsx'
 
 # Airports layer files
 kml_file_apts    = 'data/custom_mexican_airports.kml'
@@ -18,7 +18,7 @@ kmz_file_heli    = 'data/custom_mexican_heliports.kmz'
 
 build_dir        = 'build_pack'
 navdata_dir      = File.join(build_dir, 'navdata')
-custom_pack_zip  = 'FEMPPA-Mexican-Airports-v2.2.zip'
+custom_pack_zip  = 'FEMPPA-Mexican-Airports-v2.3.zip'
 
 # --- Translation Maps ---
 aerodrome_type_map = {
@@ -254,17 +254,16 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
       # 21: LONGITUD DE PISTA A       → Runway Length
       # 22: ANCHO DE PISTA A          → Runway Width
       # 23: TIPO DE SUPERFICIE A      → Surface Type
-      # 24: AERONAVE CRITICA          → Critical Aircraft
-      # 25: FECHA DE EXPEDICIÓN       → Issue Date
-      # 26: DURACIÓN DEL PERMISO/AUTORIZACIÓN → Permit/Authorization Duration
-      # 27: FECHA DE VENCIMIENTO      → Expiration Date
-      # 28: MES                       → Month
-      # 29: AÑO                       → Year
-      # 30: ¿VIGENTE?                → Active?
-      # 31: SITUACIÓN                 → Status
-      # 32: AEROPUERTO DE CORDINACIÓN → Coordination Airport
+      # 24: FECHA DE EXPEDICIÓN       → Issue Date
+      # 25: DURACIÓN DEL PERMISO/AUTORIZACIÓN → Permit/Authorization Duration
+      # 26: FECHA DE VENCIMIENTO      → Expiration Date
+      # 27: MES                       → Month
+      # 28: AÑO                       → Year
+      # 29: ¿VIGENTE?                → Active?
+      # 30: SITUACIÓN                 → Status
+      # 31: AEROPUERTO DE CORDINACIÓN → Coordination Airport
       #
-      # Note: AERONAVE CRITICA, MES, and AÑO were absent in November 2025 but returned in March 2026
+      # Note: AERONAVE CRITICA absent again in April 2026 (was restored in March 2026, now removed)
 
       (1..sheet.last_row).each do |i|
         next if i < 3  # Skip header rows
@@ -300,15 +299,15 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
         runway_length_ft = runway_length.empty? ? '' : (runway_length.to_f * METER_TO_FEET).round(0)
         runway_width_ft = runway_width.empty? ? '' : (runway_width.to_f * METER_TO_FEET).round(0)
 
-        critical_aircraft = row[24].to_s.strip
-        issue_date        = row[25].to_s.strip
-        permit_duration   = row[26].to_s.strip
-        expiration_date   = row[27].to_s.strip
-        month             = row[28].to_s.strip
-        year              = row[29].to_s.strip
-        active            = row[30].to_s.strip
-        status            = row[31].to_s.strip
-        coordination_apt  = row[32].to_s.strip
+        critical_aircraft = ""           # AERONAVE CRITICA removed in April 2026
+        issue_date        = row[24].to_s.strip
+        permit_duration   = row[25].to_s.strip
+        expiration_date   = row[26].to_s.strip
+        month             = row[27].to_s.strip
+        year              = row[28].to_s.strip
+        active            = row[29].to_s.strip
+        status            = row[30].to_s.strip
+        coordination_apt  = row[31].to_s.strip
         
         # Apply translations using mapping hashes.
         translated_aerodrome_type = maps[:aerodrome_type_map][aerodrome_type] || aerodrome_type
@@ -549,13 +548,6 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
                   <td colspan="2" class="spacer"></td>
                 </tr>
                 <tr>
-                  <td class="label">Critical Aircraft</td>
-                  <td class="value">#{translated_aircraft}</td>
-                </tr>
-                <tr>
-                  <td colspan="2" class="spacer"></td>
-                </tr>
-                <tr>
                   <td class="label">Issue Date</td>
                   <td class="value">#{translated_issue_date}</td>
                 </tr>
@@ -619,7 +611,6 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
           Runway Orientation: #{runway_orient_1}#{runway_orient_2.empty? ? '' : ' / ' + runway_orient_2}
           Runway Dimensions: #{runway_length.empty? ? 'N/A' : runway_length_ft.to_s + ' ft (' + runway_length.to_s.sub('.0', '') + ' m)'}#{runway_width.empty? ? '' : ' × ' + runway_width_ft.to_s + ' ft (' + runway_width.to_s.sub('.0', '') + ' m)'}
           Runway Surface: #{translated_surface_type}
-          Critical Aircraft: #{translated_aircraft}
           Issue Date: #{translated_issue_date}
           Permit/Authorization Duration: #{translated_permit_duration}
           Expiration Date: #{translated_expiration_date}
@@ -703,7 +694,7 @@ today = Date.today
 expiration = today >> 4  # 4 months from today
 manifest_content = {
   "name" => "Mexican Airports",
-  "version" => 2.2,
+  "version" => 2.3,
   "expirationDate" => expiration.strftime("%Y%m%dT000000"),
   "effectiveDate" => today.strftime("%Y%m%dT000000"),
   "noShare" => "true",
@@ -712,8 +703,8 @@ manifest_content = {
 File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_content))
 
 # Copy both KMZ files into the navdata directory.
-FileUtils.cp(kmz_file_apts, File.join(navdata_dir, "FEMPPA Apts 03-26.kmz"))
-FileUtils.cp(kmz_file_heli, File.join(navdata_dir, "FEMPPA Heli 03-26.kmz"))
+FileUtils.cp(kmz_file_apts, File.join(navdata_dir, "FEMPPA Apts 04-26.kmz"))
+FileUtils.cp(kmz_file_heli, File.join(navdata_dir, "FEMPPA Heli 04-26.kmz"))
 puts "Custom pack structure created successfully in '#{build_dir}'"
 
 # --- Step 4: Package the Custom Pack as a ZIP File ---

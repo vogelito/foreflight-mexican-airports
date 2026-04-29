@@ -5,6 +5,74 @@ All notable changes to the ForeFlight Mexican Airports Custom Pack will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3] - 2026-04-29
+
+### Changed
+
+**Updated to April 2026 AFAC Database**
+- Source file: `aerodromos-y-helipuertos-pub-210426.xlsx` (was `aerodromos-helipuertos-pub-020326.xlsx`)
+- Published: April 21, 2026 (was March 2, 2026)
+- Total entries: 2,177 (was 2,174) - net +3 facilities
+- Note: AFAC renamed their file slightly (`aerodromos-y-helipuertos` with "y" vs prior hyphen format)
+
+**KMZ Filenames**
+- Updated from "03-26" to "04-26" to reflect April 2026 data
+- `FEMPPA Apts 04-26.kmz` (was `FEMPPA Apts 03-26.kmz`)
+- `FEMPPA Heli 04-26.kmz` (was `FEMPPA Heli 03-26.kmz`)
+
+**Distribution Package**
+- Updated from `FEMPPA-Mexican-Airports-v2.2.zip` to `FEMPPA-Mexican-Airports-v2.3.zip`
+
+### Technical Changes
+
+**Database Schema Change (32-column format)**
+- AERONAVE CRITICA (Critical Aircraft) removed again — was restored in March 2026, absent again in April 2026
+- All columns after index 23 shift left by 1 vs v2.2:
+  - Issue Date: column 25 → 24
+  - Permit Duration: column 26 → 25
+  - Expiration Date: column 27 → 26
+  - MES (Month): column 28 → 27
+  - AÑO (Year): column 29 → 28
+  - Active?: column 30 → 29
+  - **Status (SITUACIÓN): column 31 → 30** (critical for icon color assignment)
+  - Coordination Airport: column 32 → 31
+- MES and AÑO remain present (unlike November 2025 which dropped all three)
+- Critical Aircraft row removed from placemark HTML descriptions
+
+### Data Source
+
+**AFAC (Agencia Federal de Aviación Civil) Aerodrome Database**
+- File: `aerodromos-y-helipuertos-pub-210426.xlsx`
+- Published: April 21, 2026
+- Entries: 2,177 Mexican facilities
+- Columns: 32
+- Source: https://www.gob.mx/afac/acciones-y-programas/base-de-datos-de-aerodromos-y-helipuertos
+
+### Installation
+
+**Upgrading from a previous version:**
+1. In ForeFlight, go to More > Content
+2. Find the old FEMPPA pack, swipe left and delete it
+3. Download `FEMPPA-Mexican-Airports-v2.3.zip`
+4. Transfer to your device and open ForeFlight > More > Content > Import
+5. Select the ZIP file to import
+6. Toggle layers: Map > Layers > FEMPPA Mexican Airports / FEMPPA Mexican Heliports
+
+> **Note:** ForeFlight does not support in-place pack updates — always delete the old pack first to avoid duplicates.
+
+**Optional:** Disable auto-zoom in More > Settings > Layer Selector > Auto-Zoom to Custom Content
+
+### Historical Database Archive
+
+All AFAC source databases are preserved in the `afac-sources/` directory:
+- `base-aerodromo-helipuertos-pub-28022025.xlsx` (February 2025)
+- `aerodromos-helipuertos-pub-300925-01102025.xlsx` (September 2025)
+- `aerodromos-helipuertos-pub-301125-02122025.xlsx` (November 2025)
+- `aerodromos-helipuertos-pub-020326.xlsx` (March 2026)
+- `aerodromos-y-helipuertos-pub-210426.xlsx` (April 2026)
+
+---
+
 ## [2.2] - 2026-03-23
 
 ### Changed
@@ -337,6 +405,7 @@ Data source: AFAC (Agencia Federal de Aviación Civil)
 
 ---
 
+[2.3]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.2...v2.3
 [2.2]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.1...v2.2
 [2.1]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.0...v2.1
 [2.0]: https://github.com/vogelito/foreflight-mexican-airports/compare/v1.0...v2.0
