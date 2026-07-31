@@ -5,6 +5,51 @@ All notable changes to the ForeFlight Mexican Airports Custom Pack will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4] - 2026-07-31
+
+### Changed
+
+**Updated to July 2026 AFAC Database**
+- Source file: `aerodromo-helipuertos-pub-290726.xlsx` (was `aerodromos-y-helipuertos-pub-210426.xlsx`)
+- Published: July 29, 2026 (was April 21, 2026)
+- Total entries: 2,186 (was 2,177) - net +9 facilities
+- Note: AFAC reverted the filename to the hyphenated `aerodromo-helipuertos` form (no "y")
+
+**KMZ Filenames**
+- Updated from "04-26" to "07-26" to reflect July 2026 data
+- `FEMPPA Apts 07-26.kmz` (was `FEMPPA Apts 04-26.kmz`)
+- `FEMPPA Heli 07-26.kmz` (was `FEMPPA Heli 04-26.kmz`)
+
+**Distribution Package**
+- Updated from `FEMPPA-Mexican-Airports-v2.3.zip` to `FEMPPA-Mexican-Airports-v2.4.zip`
+
+### Technical Changes
+
+**No schema change** — July 2026 uses the same 32-column layout as April 2026 (AERONAVE CRITICA still absent, Status at column 30). No column-mapping changes were required in the build script.
+
+### Data Source
+
+**AFAC (Agencia Federal de Aviación Civil) Aerodrome Database**
+- File: `aerodromo-helipuertos-pub-290726.xlsx`
+- Published: July 29, 2026
+- Entries: 2,186 Mexican facilities
+- Columns: 32
+- Source: https://www.gob.mx/afac/acciones-y-programas/base-de-datos-de-aerodromos-y-helipuertos
+
+### Installation
+
+**Upgrading from a previous version:**
+1. In ForeFlight, go to More > Content
+2. Find the old FEMPPA pack, swipe left and delete it
+3. Download `FEMPPA-Mexican-Airports-v2.4.zip`
+4. Transfer to your device and open ForeFlight > More > Content > Import
+5. Select the ZIP file to import
+6. Toggle layers: Map > Layers > FEMPPA Mexican Airports / FEMPPA Mexican Heliports
+
+> **Note:** ForeFlight does not support in-place pack updates — always delete the old pack first to avoid duplicates.
+
+**Optional:** Disable auto-zoom in More > Settings > Layer Selector > Auto-Zoom to Custom Content
+
 ## [2.3] - 2026-04-29
 
 ### Changed
@@ -405,6 +450,7 @@ Data source: AFAC (Agencia Federal de Aviación Civil)
 
 ---
 
+[2.4]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.3...v2.4
 [2.3]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.2...v2.3
 [2.2]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.1...v2.2
 [2.1]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.0...v2.1

@@ -13,11 +13,11 @@ This repository generates ForeFlight custom packs for Mexican airports and helip
 ruby script/create_custom_pack.rb
 ```
 This is the main command that:
-1. Reads the Excel file from `data/aerodromos-y-helipuertos-pub-210426.xlsx`
+1. Reads the Excel file from `data/aerodromo-helipuertos-pub-290726.xlsx`
 2. Generates KML files at `data/custom_mexican_airports.kml` and `data/custom_mexican_heliports.kml`
 3. Creates KMZ files at `data/custom_mexican_airports.kmz` and `data/custom_mexican_heliports.kmz`
 4. Builds the custom pack folder structure in `build_pack/`
-5. Packages everything into `FEMPPA-Mexican-Airports-v2.3.zip`
+5. Packages everything into `FEMPPA-Mexican-Airports-v2.4.zip`
 
 ### Generate PNG Icons from SVG
 ```bash
@@ -119,8 +119,8 @@ Each placemark includes:
 build_pack/
 ├── manifest.json              # ForeFlight metadata (dates, version, org name)
 └── navdata/
-    ├── FEMPPA Apts 04-26.kmz  # Airports layer
-    └── FEMPPA Heli 04-26.kmz  # Heliports layer
+    ├── FEMPPA Apts 07-26.kmz  # Airports layer
+    └── FEMPPA Heli 07-26.kmz  # Heliports layer
 ```
 
 ### Manifest Configuration
@@ -133,7 +133,7 @@ Located at script/create_custom_pack.rb (around line 698):
 
 ## Important Notes
 
-### Excel Column Mapping (April 2026 Format)
+### Excel Column Mapping (July 2026 Format)
 The script expects specific column indices (0-based, starting at row 3):
 - 0: File Number (NO. DE EXPEDIENTE)
 - 1: Aerodrome Type (TIPO AERÓDROMO)
@@ -164,12 +164,12 @@ The script expects specific column indices (0-based, starting at row 3):
 - 30: Status (SITUACIÓN) - **Critical for icon selection**
 - 31: Coordination Airport (AEROPUERTO DE CORDINACIÓN)
 
-**Important Changes from Previous Format (March 2026 → April 2026):**
-- Removed column: AERONAVE CRITICA (was col 24 in March 2026, absent again in April 2026)
-- Date/status columns shifted left by 1: Status moved from column 31 back to column 30
-- 32-column format (MES and AÑO present, but Critical Aircraft absent)
+**Format stability (April 2026 → July 2026):**
+- No schema change — July 2026 uses the identical 32-column layout as April 2026
+- AERONAVE CRITICA remains absent; Status stays at column 30
+- AFAC reverted the filename to the hyphenated `aerodromo-helipuertos` form (no "y")
 
-The status column (28) determines the icon suffix:
+The status column (30) determines the icon suffix:
 - "VIGENTE" → active (green icons)
 - "EN TRAMITE" → in_permit (yellow icons)
 - All others → inactive (red icons)
@@ -183,7 +183,7 @@ The status column (28) determines the icon suffix:
 - Rows with coordinates (0, 0) are skipped
 - First two rows of Excel are always skipped as headers
 - Geographic boundaries enforced: Latitude 14°-33°N, Longitude 86°-119°W
-- Script processes 2,177 aerodrome entries from the April 2026 database
+- Script processes 2,186 aerodrome entries from the July 2026 database
 
 ### ForeFlight Integration
 The custom pack follows ForeFlight's specification:
@@ -212,5 +212,6 @@ Starting with version 2.1, all AFAC source Excel files are preserved in the `afa
 - `aerodromos-helipuertos-pub-301125-02122025.xlsx` (November 2025 format - 30 columns)
 - `aerodromos-helipuertos-pub-020326.xlsx` (March 2026 format - 33 columns, restored AERONAVE CRITICA/MES/AÑO)
 - `aerodromos-y-helipuertos-pub-210426.xlsx` (April 2026 format - 32 columns, AERONAVE CRITICA removed again)
+- `aerodromo-helipuertos-pub-290726.xlsx` (July 2026 format - 32 columns, unchanged from April 2026; filename reverted to hyphenated form)
 
-**Note**: The `data/` directory is used for intermediary build files (KML, KMZ) and should not be used for source file storage. The script currently references the working file from `data/aerodromos-y-helipuertos-pub-210426.xlsx` but all archival copies are in `afac-sources/`.
+**Note**: The `data/` directory is used for intermediary build files (KML, KMZ) and should not be used for source file storage. The script currently references the working file from `data/aerodromo-helipuertos-pub-290726.xlsx` but all archival copies are in `afac-sources/`.
