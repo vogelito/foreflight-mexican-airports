@@ -18,7 +18,7 @@ kmz_file_heli    = 'data/custom_mexican_heliports.kmz'
 
 build_dir        = 'build_pack'
 navdata_dir      = File.join(build_dir, 'navdata')
-custom_pack_zip  = 'FEMPPA-Mexican-Airports-v2.5.1.zip'
+custom_pack_zip  = 'FEMPPA-Mexican-Airports-v2.6.zip'
 
 # --- Translation Maps ---
 aerodrome_type_map = {
@@ -739,7 +739,7 @@ today = Date.today
 expiration = today >> 4  # 4 months from today
 manifest_content = {
   "name" => "Mexican Airports",
-  "version" => 2.51,  # v2.5.1; ForeFlight expects a number, so patch releases use the second decimal
+  "version" => 2.6,
   "expirationDate" => expiration.strftime("%Y%m%dT000000"),
   "effectiveDate" => today.strftime("%Y%m%dT000000"),
   "noShare" => "true",

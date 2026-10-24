@@ -17,7 +17,7 @@ This is the main command that:
 2. Generates KML files at `data/custom_mexican_airports.kml` and `data/custom_mexican_heliports.kml`
 3. Creates KMZ files at `data/custom_mexican_airports.kmz` and `data/custom_mexican_heliports.kmz`
 4. Builds the custom pack folder structure in `build_pack/`
-5. Packages everything into `FEMPPA-Mexican-Airports-v2.5.1.zip`
+5. Packages everything into `FEMPPA-Mexican-Airports-v2.6.zip`
 6. Prints `UNTRANSLATED VALUES: none` as its last line, or lists every spreadsheet value missing from the translation maps and exits with status 1. Never ship a build that lists untranslated values.
 
 ### Generate PNG Icons from SVG
@@ -137,7 +137,7 @@ Located at script/create_custom_pack.rb (around line 698):
 - Name: "Mexican Airports"
 - Organization: "FEMPPA" (Federación Mexicana de Pilotos y Propietarios de Aeronaves)
 - Dates: effectiveDate and expirationDate in format YYYYMMDDTHHMMSS
-- Version: Numeric (2.51 for v2.5.1; patch releases use the second decimal because ForeFlight expects a number)
+- Version: Numeric (2.6). ForeFlight expects a number, so releases are always X.Y (no patch versions like 2.6.1)
 - noShare: Controls sharing permissions
 
 ## Important Notes

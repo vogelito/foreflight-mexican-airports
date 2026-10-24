@@ -5,9 +5,9 @@ All notable changes to the ForeFlight Mexican Airports Custom Pack will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.1] - 2026-10-24
+## [2.6] - 2026-10-24
 
-Same September 2026 AFAC data as 2.5 (2,192 entries); icon and translation fixes only.
+Same September 2026 AFAC data as 2.5 (2,192 entries), plus third-party service icons and translation fixes. 2.5 was tagged but never published as a release; 2.6 is the first published release with the September 2026 data.
 
 ### Added
 
@@ -29,12 +29,11 @@ Same September 2026 AFAC data as 2.5 (2,192 entries); icon and translation fixes
 
 - The build now reports every spreadsheet value missing from the translation maps as its last output and exits with status 1, so untranslated AFAC terms can't ship unnoticed
 - Icon color is chosen by status prefix ("Active…", "In Process…") instead of exact match
-- Manifest version is `2.51`; ForeFlight expects a number, so patch releases use the second decimal
-- KMZ filenames unchanged (`FEMPPA Apts 09-26.kmz`, `FEMPPA Heli 09-26.kmz`); distribution package is `FEMPPA-Mexican-Airports-v2.5.1.zip`
+- KMZ filenames unchanged from 2.5 (`FEMPPA Apts 09-26.kmz`, `FEMPPA Heli 09-26.kmz`); distribution package is `FEMPPA-Mexican-Airports-v2.6.zip`
 
 ### Installation
 
-Same as 2.5: in ForeFlight, delete the old FEMPPA pack first (More > Content, swipe left), then import `FEMPPA-Mexican-Airports-v2.5.1.zip`.
+In ForeFlight, delete the old FEMPPA pack first (More > Content, swipe left), then import `FEMPPA-Mexican-Airports-v2.6.zip`.
 
 ## [2.5] - 2026-10-24
 
@@ -532,7 +531,7 @@ Data source: AFAC (Agencia Federal de Aviación Civil)
 
 ---
 
-[2.5.1]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.4...v2.5.1
+[2.6]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.5...v2.6
 [2.5]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.4...v2.5
 [2.4]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.3...v2.4
 [2.3]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.2...v2.3

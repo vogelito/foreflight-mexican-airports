@@ -41,7 +41,7 @@ ruby .claude/skills/afac-update/scripts/headers.rb afac-sources/<previous>.xlsx 
 
 ## 3. Bump the version and dates
 
-Decide the new version: previous minor + 0.1, e.g. v2.5.1 → v2.6 (check `git tag` and `CHANGELOG.md`). The manifest `"version"` is a number, so v2.6 is `2.6` and a patch release like v2.5.1 is `2.51`. The KMZ suffix is `MM-YY` of the AFAC publication date.
+Decide the new version: previous + 0.1, e.g. v2.6 → v2.7 (check `git tag` and `CHANGELOG.md`). Always use X.Y, never a patch version like 2.6.1: the manifest `"version"` must be a plain number. The KMZ suffix is `MM-YY` of the AFAC publication date.
 
 In `script/create_custom_pack.rb`:
 
@@ -88,11 +88,13 @@ Make one commit titled `Update to vX.Y with <Month Year> AFAC database`. Include
 
 Releases are GitHub releases with the ZIP attached, matching earlier ones (`gh release view v2.4`):
 
-```bash
-git tag vX.Y
-git push origin main vX.Y
-gh release create vX.Y FEMPPA-Mexican-Airports-vX.Y.zip --title "vX.Y - <Month Year> AFAC Database" --notes "<one-line summary>. See CHANGELOG for full details."
-```
+1. Tag locally: `git tag vX.Y`
+2. **Never run `git push` yourself.** Tell the user to run `git push origin main vX.Y` and wait until they confirm.
+3. Then create the release:
+
+   ```bash
+   gh release create vX.Y FEMPPA-Mexican-Airports-vX.Y.zip --title "vX.Y - <Month Year> AFAC Database" --notes "<one-line summary>. See CHANGELOG for full details."
+   ```
 
 ## Report back
 
