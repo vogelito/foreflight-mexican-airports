@@ -18,7 +18,7 @@ kmz_file_heli    = 'data/custom_mexican_heliports.kmz'
 
 build_dir        = 'build_pack'
 navdata_dir      = File.join(build_dir, 'navdata')
-custom_pack_zip  = 'FEMPPA-Mexican-Airports-v2.5.zip'
+custom_pack_zip  = 'FEMPPA-Mexican-Airports-v2.5.1.zip'
 
 # --- Translation Maps ---
 aerodrome_type_map = {
@@ -59,14 +59,17 @@ status_map = {
   "DESISTIMIENTO DEL TRAMITE" => "Procedure Withdrawal",
   "EN TRAMITE" => "In Process",
   "EN TRAMITE DE CANCELACION" => "Cancellation in Process",
+  "EN TRAMITE DE UN PERMISO DE SERV. PARTICULAR Y A TERCEROS" => "In Process (Private and Third-Party Service Permit)",
   "INOPERATIVO" => "Inoperative",
+  "INOPERATIVO (FALLECIMIENTO DEL TITULAR)" => "Inoperative (Owner's Death)",
   "INOPERATIVO (RENUNCIA DEL TITULAR)" => "Inoperative (Owner Renunciation)",
   "INOPERATIVO POR SISMO" => "Inoperative Due to Earthquake",
   "MILITAR" => "Military",
   "SIN PERMISO POR FALLECIMIEMTO DE TITULAR" => "No Permit (Owner's Death)",
   "SIN PERMISO POR FALLECIMIENTO DE TITULAR" => "No Permit (Owner's Death)",
   "VIGEMTE" => "Active",
-  "VIGENTE" => "Active"
+  "VIGENTE" => "Active",
+  "VIGENTE (EN TRAMITE PARA LA PRESTACION DE SERV. A TERCEROS)" => "Active (Third-Party Service Permit in Process)"
 }
 
 # Additional translation maps for dates and duration.
@@ -166,17 +169,34 @@ aircraft_generic_map = {
   "BIMOTORES" => "Twin-engine"
 }
 
+# Spreadsheet values that have no entry in their translation map, by field.
+# Filled in during the build and reported at the end, so new AFAC terminology
+# is never silently published in Spanish.
+UNTRANSLATED = Hash.new { |h, k| h[k] = Hash.new(0) }
+
+# Look up key in map; if missing, record the raw value under field and return it untranslated.
+def translate(map, key, field, value = key)
+  return map[key] if map.key?(key)
+  UNTRANSLATED[field][value] += 1 unless value.to_s.strip.empty?
+  value
+end
+
 def translate_duration(duration, duration_units_map)
   duration = duration.strip
   return duration if duration.empty?
   if duration =~ /^(\d+)\s*([[:alpha:]]+)/
     number = $1
     unit = $2
-    translated_unit = duration_units_map[unit.upcase] || unit
+    translated_unit = translate(duration_units_map, unit.upcase, "Permit duration unit", unit)
     "#{number} #{translated_unit}"
   else
-    duration_units_map[duration.upcase] || duration
+    translate(duration_units_map, duration.upcase, "Permit duration", duration)
   end
+end
+
+# Dates are passed through as-is; only words (e.g. PROYECTO) need translating.
+def translate_date(map, value, field)
+  value =~ /[[:alpha:]]/ ? translate(map, value.upcase, field, value) : value
 end
 
 # Layer filter function - determines which layer(s) an aerodrome belongs to
@@ -198,6 +218,12 @@ end
 # Conversion factor: 1 meter = 3.28084 feet
 METER_TO_FEET = 3.28084
 
+# Icon base names; each has _active, _in_permit and _inactive PNGs in assets/.
+# The _3p (third-party service, diamond) variants exist for these bases only.
+THIRD_PARTY_BASES = ["aerodrome", "heliport"]
+ICON_BASES = ["aerodrome", "heliport", "seaplane_base", "takeoff_zone"] +
+             THIRD_PARTY_BASES.map { |b| "#{b}_3p" }
+
 # Method to generate KML for a specific layer
 def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_name, maps)
   puts "Generating #{layer_name} KML..."
@@ -213,7 +239,7 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
 
       # --- Add Styles for each combination of Aerodrome Type and Status ---
       # Define styles for each base type and status version.
-      ["aerodrome", "heliport", "seaplane_base", "takeoff_zone"].each do |base|
+      ICON_BASES.each do |base|
         ["active", "in_permit", "inactive"].each do |suffix|
           style_id = "#{base}_#{suffix}"
           icon_href = "files/#{base}_#{suffix}.png"
@@ -312,25 +338,31 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
         coordination_apt  = row[31].to_s.strip
         
         # Apply translations using mapping hashes.
-        translated_aerodrome_type = maps[:aerodrome_type_map][aerodrome_type] || aerodrome_type
+        # Aerodrome type is translated before the layer filter, so only record misses
+        # once (in the airports pass) to avoid double counting.
+        translated_aerodrome_type = maps[:aerodrome_type_map][aerodrome_type] ||
+          (layer_type == :airports ? translate(maps[:aerodrome_type_map], aerodrome_type, "Aerodrome type") : aerodrome_type)
 
         # Filter: Skip this aerodrome if it doesn't belong to the current layer
         next unless belongs_to_layer?(translated_aerodrome_type, layer_type)
 
-        translated_operation_type  = maps[:operation_type_map][type_of_operation] || type_of_operation
-        translated_service_type    = maps[:service_type_map][type_of_service] || type_of_service
-        translated_active          = maps[:active_map][active.upcase] || active
-        translated_status          = maps[:status_map][status.upcase] || status
+        translated_operation_type  = translate(maps[:operation_type_map], type_of_operation, "Type of operation")
+        translated_service_type    = translate(maps[:service_type_map], type_of_service, "Type of service")
+        translated_active          = translate(maps[:active_map], active.upcase, "Active?", active)
+        translated_status          = translate(maps[:status_map], status.upcase, "Status", status)
 
         # Translate date and duration fields.
-        translated_issue_date = maps[:issue_date_map][issue_date.upcase] || issue_date
-        translated_expiration_date = maps[:expiration_date_map][expiration_date.upcase] || expiration_date
+        translated_issue_date = translate_date(maps[:issue_date_map], issue_date, "Issue date")
+        translated_expiration_date = translate_date(maps[:expiration_date_map], expiration_date, "Expiration date")
         translated_permit_duration = translate_duration(permit_duration, maps[:duration_units_map])
 
         # Translate new fields.
-        translated_classification = maps[:classification_map][classification.upcase] || classification
-        translated_surface_type = maps[:surface_type_map][surface_type.upcase] || surface_type
+        translated_classification = translate(maps[:classification_map], classification.upcase, "Classification", classification)
+        translated_surface_type = translate(maps[:surface_type_map], surface_type.upcase, "Surface type", surface_type)
         translated_aircraft = maps[:aircraft_generic_map][critical_aircraft.upcase] || critical_aircraft
+
+        # Third-party service permits get a diamond icon instead of a circle.
+        third_party = translated_service_type == "Private and Third-Party Service"
 
         # Convert elevation from meters to feet.
         elevation_ft = (elevation_m * METER_TO_FEET).round(2)
@@ -364,14 +396,17 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
         end
 
         # Determine which icon status to use: active, in_permit, or inactive.
-        if translated_status == "Active"
+        # Prefix match so qualified statuses like "Active (Third-Party Service
+        # Permit in Process)" keep their color.
+        if translated_status.start_with?("Active")
           icon_suffix = "active"
-        elsif translated_status == "In Process"
+        elsif translated_status.start_with?("In Process")
           icon_suffix = "in_permit"
         else
           icon_suffix = "inactive"
         end
 
+        base = "#{base}_3p" if third_party && THIRD_PARTY_BASES.include?(base)
         style_id = "#{base}_#{icon_suffix}"
         
         # Build a nicely formatted HTML description
@@ -475,6 +510,13 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
                 <tr>
                   <td class="label">Type of Service</td>
                   <td class="value">#{translated_service_type}</td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="spacer"></td>
+                </tr>
+                <tr>
+                  <td class="label">Third-Party Services</td>
+                  <td class="value">#{third_party ? 'Yes' : 'No'}</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="spacer"></td>
@@ -603,6 +645,7 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
           Municipality: #{municipality}
           Type of Operation: #{translated_operation_type}
           Type of Service: #{translated_service_type}
+          Third-Party Services: #{third_party ? 'Yes' : 'No'}
           Classification: #{translated_classification}
           Reference Key: #{reference_key}
           Owner: #{owner}
@@ -651,7 +694,7 @@ def generate_kml_for_layer(excel_file, kml_file, kmz_file, layer_type, layer_nam
     zipfile.add("doc.kml", kml_file)
     # Add a "files" folder with all the icon PNGs inside the KMZ.
     zipfile.mkdir("files") unless zipfile.find_entry("files/")
-    ["aerodrome", "heliport", "seaplane_base", "takeoff_zone"].each do |base|
+    ICON_BASES.each do |base|
       ["active", "in_permit", "inactive"].each do |suffix|
         icon_path = "assets/#{base}_#{suffix}.png"
         zipfile.add("files/#{base}_#{suffix}.png", icon_path)
@@ -696,7 +739,7 @@ today = Date.today
 expiration = today >> 4  # 4 months from today
 manifest_content = {
   "name" => "Mexican Airports",
-  "version" => 2.5,
+  "version" => 2.51,  # v2.5.1; ForeFlight expects a number, so patch releases use the second decimal
   "expirationDate" => expiration.strftime("%Y%m%dT000000"),
   "effectiveDate" => today.strftime("%Y%m%dT000000"),
   "noShare" => "true",
@@ -736,3 +779,15 @@ end
 
 zip_directory(build_dir, custom_pack_zip)
 puts "Custom pack ZIP file created successfully: #{custom_pack_zip}"
+
+# --- Step 5: Report values that are missing from the translation maps ---
+# Printed last so it's visible at the end of the (very long) build output.
+if UNTRANSLATED.empty?
+  puts "UNTRANSLATED VALUES: none"
+else
+  puts "UNTRANSLATED VALUES: #{UNTRANSLATED.values.sum(&:size)} - add them to the translation maps and rebuild"
+  UNTRANSLATED.each do |field, values|
+    values.each { |value, count| puts "  #{field}: #{value.inspect} (#{count}x)" }
+  end
+  exit 1
+end

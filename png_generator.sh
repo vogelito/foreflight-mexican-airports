@@ -6,7 +6,8 @@ IN_PERMIT="#F1C40F"
 INACTIVE="#7F8C8D"
 
 # Define the SVG files (adjust the list as needed)
-svgs=("assets/aerodrome.svg" "assets/heliport.svg" "assets/seaplane_base.svg" "assets/takeoff_zone.svg")
+svgs=("assets/aerodrome.svg" "assets/heliport.svg" "assets/seaplane_base.svg" "assets/takeoff_zone.svg"
+      "assets/aerodrome_3p.svg" "assets/heliport_3p.svg")
 
 # Loop over each file and each status version
 for svg in "${svgs[@]}"; do

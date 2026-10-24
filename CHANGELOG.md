@@ -5,6 +5,37 @@ All notable changes to the ForeFlight Mexican Airports Custom Pack will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-10-24
+
+Same September 2026 AFAC data as 2.5 (2,192 entries); icon and translation fixes only.
+
+### Added
+
+**Third-Party Service Icons**
+- Aerodromes and heliports with a third-party service permit (`SERVICIO PARTICULAR Y A TERCEROS`) now use a **diamond** icon instead of a circle, in the same status colors (green active, yellow in process, grey inactive)
+- 97 entries use the diamond (76 aerodromes, 20 heliports, 1 combined aerodrome-heliport)
+- New popup row: "Third-Party Services: Yes/No"
+
+### Fixed
+
+**Wrong icon colors**: three entries with qualified statuses fell through to the grey inactive icon
+- XRCF Aeropista de la Región Carbonífera, `VIGENTE (EN TRAMITE PARA LA PRESTACION DE SERV. A TERCEROS)`: now green ("Active (Third-Party Service Permit in Process)")
+- XMUZ Múzquiz and XCUC Constitucionalista, `EN TRAMITE DE UN PERMISO DE SERV. PARTICULAR Y A TERCEROS`: now yellow ("In Process (Private and Third-Party Service Permit)")
+
+**Missing translation**
+- `INOPERATIVO (FALLECIMIENTO DEL TITULAR)` → "Inoperative (Owner's Death)" (XLUN La Luna, XMGS Los Mangos)
+
+### Technical Changes
+
+- The build now reports every spreadsheet value missing from the translation maps as its last output and exits with status 1, so untranslated AFAC terms can't ship unnoticed
+- Icon color is chosen by status prefix ("Active…", "In Process…") instead of exact match
+- Manifest version is `2.51`; ForeFlight expects a number, so patch releases use the second decimal
+- KMZ filenames unchanged (`FEMPPA Apts 09-26.kmz`, `FEMPPA Heli 09-26.kmz`); distribution package is `FEMPPA-Mexican-Airports-v2.5.1.zip`
+
+### Installation
+
+Same as 2.5: in ForeFlight, delete the old FEMPPA pack first (More > Content, swipe left), then import `FEMPPA-Mexican-Airports-v2.5.1.zip`.
+
 ## [2.5] - 2026-10-24
 
 ### Changed
@@ -501,6 +532,7 @@ Data source: AFAC (Agencia Federal de Aviación Civil)
 
 ---
 
+[2.5.1]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.4...v2.5.1
 [2.5]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.4...v2.5
 [2.4]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.3...v2.4
 [2.3]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.2...v2.3
