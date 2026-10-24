@@ -13,6 +13,8 @@ kml = { 'airports' => File.read('data/custom_mexican_airports.kml'),
 counts = kml.transform_values { |k| k.scan('<Placemark>').size }
 puts "source data rows: #{rows.size}"
 puts "placemarks: #{counts.map { |n, c| "#{n}=#{c}" }.join(' ')} total=#{counts.values.sum}"
+styles = kml.values.join.scan(/<styleUrl>#(.*?)<\/styleUrl>/).flatten.tally.sort
+puts "icons: #{styles.map { |st, c| "#{st}=#{c}" }.join(' ')}"
 
 all = kml.values.join
 ids.each do |id|

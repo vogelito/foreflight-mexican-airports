@@ -35,11 +35,13 @@ ruby .claude/skills/afac-update/scripts/headers.rb afac-sources/<previous>.xlsx 
   ruby .claude/skills/afac-update/scripts/new_values.rb afac-sources/<previous>.xlsx afac-sources/<new>.xlsx
   ```
 
-  For each new value, check the matching `*_map` at the top of `script/create_custom_pack.rb` (lookups ignore case) and add an English translation if it's missing. A missing entry doesn't break the build; the value just shows in Spanish. A new status that isn't `VIGENTE` or `EN TRAMITE` automatically gets the red inactive icon.
+  This only shows values that are *new since the previous release*, which is handy for the changelog. The authoritative check is the build's `UNTRANSLATED VALUES` report in step 4, which catches every missing translation, old or new.
+
+  For each new value, check the matching `*_map` at the top of `script/create_custom_pack.rb` (most lookups ignore case) and add an English translation if it's missing. A missing entry doesn't break the build; the value just shows in Spanish. A new status that isn't `VIGENTE` or `EN TRAMITE` automatically gets the grey inactive icon, so a new status that really means active or in process needs a translation that maps it to "Active" or "In Process".
 
 ## 3. Bump the version and dates
 
-Decide the new version: previous + 0.1 (check `git tag` and `CHANGELOG.md`). The KMZ suffix is `MM-YY` of the AFAC publication date.
+Decide the new version: previous minor + 0.1, e.g. v2.5.1 → v2.6 (check `git tag` and `CHANGELOG.md`). The manifest `"version"` is a number, so v2.6 is `2.6` and a patch release like v2.5.1 is `2.51`. The KMZ suffix is `MM-YY` of the AFAC publication date.
 
 In `script/create_custom_pack.rb`:
 
@@ -56,14 +58,22 @@ In `script/create_custom_pack.rb`:
 ruby script/create_custom_pack.rb
 ```
 
-The build prints every entry, so its output is long. Check the last lines for `Custom pack ZIP file created successfully`.
+The build prints every entry, so its output is long. The last two lines must be:
+
+```
+Custom pack ZIP file created successfully: FEMPPA-Mexican-Airports-vX.Y.zip
+UNTRANSLATED VALUES: none
+```
+
+If it lists untranslated values instead (and exits with status 1), add an English entry for each one to the matching map, then rebuild until the report says `none`. Use `find_rows.rb <xlsx> <col> <text>` to see which entries use a value. For a status, the translation also decides the icon color: it must start with "Active" or "In Process" if AFAC means active or pending, or the entry shows grey.
 
 ```bash
 ruby .claude/skills/afac-update/scripts/check_build.rb afac-sources/<new>.xlsx XGRN <ids from new_values.rb>
 ```
 
 - Compare `source data rows` with the previous release (the `CLAUDE.md` "Script processes N entries" line). A swing of more than about 2% suggests a parsing problem, not real-world change. Investigate before continuing.
-- For each ID, the KML coordinates must match the source DMS values and the icon must match the status (`VIGENTE` → `_active`, `EN TRAMITE` → `_in_permit`, anything else → `_inactive`). Include the IDs of rows with new values. Major airports like `XMEX` are not in this database, so don't use them.
+- The `icons:` line counts placemarks per icon. `_3p` (diamond) icons should total roughly the number of third-party entries (`value_counts.rb <xlsx> 7`).
+- For each ID, the KML coordinates must match the source DMS values and the icon must match the status (`VIGENTE…` → `_active`, `EN TRAMITE…` → `_in_permit`, anything else → `_inactive`; `_3p` when the service type includes third parties). Include the IDs of rows with new values. Major airports like `XMEX` are not in this database, so don't use them.
 
 ## 5. Update the docs
 
@@ -72,7 +82,17 @@ ruby .claude/skills/afac-update/scripts/check_build.rb afac-sources/<new>.xlsx X
 
 ## 6. Commit
 
-Make one commit titled `Update to vX.Y with <Month Year> AFAC database`. Include the new `afac-sources/` file and leave out the generated ZIP and `build_pack/`. Ask before tagging (`git tag vX.Y`) or pushing.
+Make one commit titled `Update to vX.Y with <Month Year> AFAC database`. Include the new `afac-sources/` file and leave out the generated ZIP and `build_pack/`.
+
+## 7. Release (only when the user asks)
+
+Releases are GitHub releases with the ZIP attached, matching earlier ones (`gh release view v2.4`):
+
+```bash
+git tag vX.Y
+git push origin main vX.Y
+gh release create vX.Y FEMPPA-Mexican-Airports-vX.Y.zip --title "vX.Y - <Month Year> AFAC Database" --notes "<one-line summary>. See CHANGELOG for full details."
+```
 
 ## Report back
 
