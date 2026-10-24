@@ -5,6 +5,57 @@ All notable changes to the ForeFlight Mexican Airports Custom Pack will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5] - 2026-10-24
+
+### Changed
+
+**Updated to September 2026 AFAC Database**
+- Source file: `aerodromos-helipuertos-pub-280926-29092026.xlsx` (was `aerodromo-helipuertos-pub-290726.xlsx`)
+- Published: September 29, 2026, data as of September 28, 2026 (was July 29, 2026)
+- Total entries: 2,192 (was 2,186) - net +6 facilities
+- Note: AFAC's filename is back to the `aerodromos-helipuertos-pub-DDMMYY-DDMMYYYY` form
+
+**KMZ Filenames**
+- Updated from "07-26" to "09-26" to reflect September 2026 data
+- `FEMPPA Apts 09-26.kmz` (was `FEMPPA Apts 07-26.kmz`)
+- `FEMPPA Heli 09-26.kmz` (was `FEMPPA Heli 07-26.kmz`)
+
+**Distribution Package**
+- Updated from `FEMPPA-Mexican-Airports-v2.4.zip` to `FEMPPA-Mexican-Airports-v2.5.zip`
+
+### Added
+
+**New Translations**
+- Surface type `ACERO` → "Steel" (offshore heliports HWG Blue Giant and HWY Blue Stingray)
+- Status `CERRADO TEMPORALMENTE POR NOTAM` → "Temporarily Closed by NOTAM" (ZON El Corazón; shown with the inactive icon)
+
+### Technical Changes
+
+**No schema change** — September 2026 uses the same 32-column layout as April and July 2026 (AERONAVE CRITICA still absent, Status at column 30). No column-mapping changes were required in the build script.
+
+### Data Source
+
+**AFAC (Agencia Federal de Aviación Civil) Aerodrome Database**
+- File: `aerodromos-helipuertos-pub-280926-29092026.xlsx`
+- Published: September 29, 2026
+- Entries: 2,192 Mexican facilities
+- Columns: 32
+- Source: https://www.gob.mx/afac/acciones-y-programas/base-de-datos-de-aerodromos-y-helipuertos
+
+### Installation
+
+**Upgrading from a previous version:**
+1. In ForeFlight, go to More > Content
+2. Find the old FEMPPA pack, swipe left and delete it
+3. Download `FEMPPA-Mexican-Airports-v2.5.zip`
+4. Transfer to your device and open ForeFlight > More > Content > Import
+5. Select the ZIP file to import
+6. Toggle layers: Map > Layers > FEMPPA Mexican Airports / FEMPPA Mexican Heliports
+
+> **Note:** ForeFlight does not support in-place pack updates — always delete the old pack first to avoid duplicates.
+
+**Optional:** Disable auto-zoom in More > Settings > Layer Selector > Auto-Zoom to Custom Content
+
 ## [2.4] - 2026-07-31
 
 ### Changed
@@ -450,6 +501,7 @@ Data source: AFAC (Agencia Federal de Aviación Civil)
 
 ---
 
+[2.5]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.4...v2.5
 [2.4]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.3...v2.4
 [2.3]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.2...v2.3
 [2.2]: https://github.com/vogelito/foreflight-mexican-airports/compare/v2.1...v2.2

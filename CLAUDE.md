@@ -13,11 +13,11 @@ This repository generates ForeFlight custom packs for Mexican airports and helip
 ruby script/create_custom_pack.rb
 ```
 This is the main command that:
-1. Reads the Excel file from `data/aerodromo-helipuertos-pub-290726.xlsx`
+1. Reads the Excel file from `data/aerodromos-helipuertos-pub-280926-29092026.xlsx`
 2. Generates KML files at `data/custom_mexican_airports.kml` and `data/custom_mexican_heliports.kml`
 3. Creates KMZ files at `data/custom_mexican_airports.kmz` and `data/custom_mexican_heliports.kmz`
 4. Builds the custom pack folder structure in `build_pack/`
-5. Packages everything into `FEMPPA-Mexican-Airports-v2.4.zip`
+5. Packages everything into `FEMPPA-Mexican-Airports-v2.5.zip`
 
 ### Generate PNG Icons from SVG
 ```bash
@@ -36,7 +36,7 @@ gem install roo builder rubyzip
 ## Architecture
 
 ### Data Flow
-1. **Input**: Excel file (`data/aerodromos-helipuertos-pub-301125-02122025.xlsx`) containing Mexican aerodrome data from AFAC
+1. **Input**: Excel file (`data/aerodromos-helipuertos-pub-280926-29092026.xlsx`) containing Mexican aerodrome data from AFAC
 2. **Processing**: Ruby script parses Excel, translates Spanish to English, converts coordinates/units
 3. **KML Generation**: Creates styled placemarks with HTML descriptions for both Airports and Heliports layers
 4. **KMZ Packaging**: Bundles KML + icon PNGs into compressed archives (one for each layer)
@@ -119,8 +119,8 @@ Each placemark includes:
 build_pack/
 ├── manifest.json              # ForeFlight metadata (dates, version, org name)
 └── navdata/
-    ├── FEMPPA Apts 07-26.kmz  # Airports layer
-    └── FEMPPA Heli 07-26.kmz  # Heliports layer
+    ├── FEMPPA Apts 09-26.kmz  # Airports layer
+    └── FEMPPA Heli 09-26.kmz  # Heliports layer
 ```
 
 ### Manifest Configuration
@@ -128,12 +128,12 @@ Located at script/create_custom_pack.rb (around line 698):
 - Name: "Mexican Airports"
 - Organization: "FEMPPA" (Federación Mexicana de Pilotos y Propietarios de Aeronaves)
 - Dates: effectiveDate and expirationDate in format YYYYMMDDTHHMMSS
-- Version: Numeric (2.1)
+- Version: Numeric (2.5)
 - noShare: Controls sharing permissions
 
 ## Important Notes
 
-### Excel Column Mapping (July 2026 Format)
+### Excel Column Mapping (September 2026 Format)
 The script expects specific column indices (0-based, starting at row 3):
 - 0: File Number (NO. DE EXPEDIENTE)
 - 1: Aerodrome Type (TIPO AERÓDROMO)
@@ -164,10 +164,10 @@ The script expects specific column indices (0-based, starting at row 3):
 - 30: Status (SITUACIÓN) - **Critical for icon selection**
 - 31: Coordination Airport (AEROPUERTO DE CORDINACIÓN)
 
-**Format stability (April 2026 → July 2026):**
-- No schema change — July 2026 uses the identical 32-column layout as April 2026
+**Format stability (April 2026 → July 2026 → September 2026):**
+- No schema change — September 2026 uses the identical 32-column layout as April and July 2026
 - AERONAVE CRITICA remains absent; Status stays at column 30
-- AFAC reverted the filename to the hyphenated `aerodromo-helipuertos` form (no "y")
+- AFAC's filename spelling keeps changing (`aerodromos-y-helipuertos`, `aerodromo-helipuertos`, `aerodromos-helipuertos-pub-DDMMYY-DDMMYYYY`); always keep the original name
 
 The status column (30) determines the icon suffix:
 - "VIGENTE" → active (green icons)
@@ -183,7 +183,7 @@ The status column (30) determines the icon suffix:
 - Rows with coordinates (0, 0) are skipped
 - First two rows of Excel are always skipped as headers
 - Geographic boundaries enforced: Latitude 14°-33°N, Longitude 86°-119°W
-- Script processes 2,186 aerodrome entries from the July 2026 database
+- Script processes 2,192 aerodrome entries from the September 2026 database (2,109 placemarks after coordinate filtering)
 
 ### ForeFlight Integration
 The custom pack follows ForeFlight's specification:
@@ -213,5 +213,6 @@ Starting with version 2.1, all AFAC source Excel files are preserved in the `afa
 - `aerodromos-helipuertos-pub-020326.xlsx` (March 2026 format - 33 columns, restored AERONAVE CRITICA/MES/AÑO)
 - `aerodromos-y-helipuertos-pub-210426.xlsx` (April 2026 format - 32 columns, AERONAVE CRITICA removed again)
 - `aerodromo-helipuertos-pub-290726.xlsx` (July 2026 format - 32 columns, unchanged from April 2026; filename reverted to hyphenated form)
+- `aerodromos-helipuertos-pub-280926-29092026.xlsx` (September 2026 format - 32 columns, unchanged; new values ACERO surface and CERRADO TEMPORALMENTE POR NOTAM status)
 
-**Note**: The `data/` directory is used for intermediary build files (KML, KMZ) and should not be used for source file storage. The script currently references the working file from `data/aerodromo-helipuertos-pub-290726.xlsx` but all archival copies are in `afac-sources/`.
+**Note**: The `data/` directory is used for intermediary build files (KML, KMZ) and should not be used for source file storage. The script currently references the working file from `data/aerodromos-helipuertos-pub-280926-29092026.xlsx` but all archival copies are in `afac-sources/`.

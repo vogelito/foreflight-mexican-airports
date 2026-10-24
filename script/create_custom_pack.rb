@@ -6,7 +6,7 @@ require 'fileutils'
 require 'json'
 
 # --- Configuration and Paths ---
-excel_file       = 'data/aerodromo-helipuertos-pub-290726.xlsx'
+excel_file       = 'data/aerodromos-helipuertos-pub-280926-29092026.xlsx'
 
 # Airports layer files
 kml_file_apts    = 'data/custom_mexican_airports.kml'
@@ -18,7 +18,7 @@ kmz_file_heli    = 'data/custom_mexican_heliports.kmz'
 
 build_dir        = 'build_pack'
 navdata_dir      = File.join(build_dir, 'navdata')
-custom_pack_zip  = 'FEMPPA-Mexican-Airports-v2.4.zip'
+custom_pack_zip  = 'FEMPPA-Mexican-Airports-v2.5.zip'
 
 # --- Translation Maps ---
 aerodrome_type_map = {
@@ -54,6 +54,7 @@ active_map = {
 
 status_map = {
   "CERRADO POR NOTAM" => "Closed by NOTAM",
+  "CERRADO TEMPORALMENTE POR NOTAM" => "Temporarily Closed by NOTAM",
   "DESISTIMIENTO DEL  TRAMITE" => "Procedure Withdrawal",
   "DESISTIMIENTO DEL TRAMITE" => "Procedure Withdrawal",
   "EN TRAMITE" => "In Process",
@@ -118,6 +119,7 @@ surface_type_map = {
   "METALICA" => "Metal",
   "METÁLICA" => "Metal",
   "ALUMINIO" => "Aluminum",
+  "ACERO" => "Steel",
   "PASTO" => "Grass",
   "AGUA" => "Water",
   "ACUÁTICA" => "Aquatic",
@@ -694,7 +696,7 @@ today = Date.today
 expiration = today >> 4  # 4 months from today
 manifest_content = {
   "name" => "Mexican Airports",
-  "version" => 2.4,
+  "version" => 2.5,
   "expirationDate" => expiration.strftime("%Y%m%dT000000"),
   "effectiveDate" => today.strftime("%Y%m%dT000000"),
   "noShare" => "true",
@@ -703,8 +705,8 @@ manifest_content = {
 File.write(File.join(build_dir, "manifest.json"), JSON.pretty_generate(manifest_content))
 
 # Copy both KMZ files into the navdata directory.
-FileUtils.cp(kmz_file_apts, File.join(navdata_dir, "FEMPPA Apts 07-26.kmz"))
-FileUtils.cp(kmz_file_heli, File.join(navdata_dir, "FEMPPA Heli 07-26.kmz"))
+FileUtils.cp(kmz_file_apts, File.join(navdata_dir, "FEMPPA Apts 09-26.kmz"))
+FileUtils.cp(kmz_file_heli, File.join(navdata_dir, "FEMPPA Heli 09-26.kmz"))
 puts "Custom pack structure created successfully in '#{build_dir}'"
 
 # --- Step 4: Package the Custom Pack as a ZIP File ---
